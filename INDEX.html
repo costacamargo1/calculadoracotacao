@@ -998,7 +998,14 @@ let baseCalculo = basePF;
     // Auto-preencher na calculadora 2
     document.getElementById('custoProduto').value = valorCusto.toFixed(4);
 }
-
+// Listener para recalcular valor de venda quando o custo mudar
+document.getElementById('custoProduto').addEventListener('input', function() {
+    const margemDireta = document.getElementById('margemDireta').value;
+    // Se houver margem direta preenchida, recalcula automaticamente
+    if (margemDireta !== '') {
+        calcularVendaPorMargem();
+    }
+});
 function limparTudo() {
     // Confirma antes de limpar
     if (!confirm('Deseja realmente limpar todos os campos?')) {
@@ -1182,8 +1189,14 @@ function calcularVendaPorMargem() {
     const custo = parseFloat(document.getElementById('custoProduto').value);
     const margemDireta = parseFloat(document.getElementById('margemDireta').value);
     
-    // Se não tiver custo ou margem válida, não faz nada
-    if (isNaN(custo) || custo <= 0 || isNaN(margemDireta)) {
+    // Se apagar a margem, limpa o valor de venda
+    if (document.getElementById('margemDireta').value === '' || isNaN(margemDireta)) {
+        document.getElementById('valorVenda').value = '';
+        return;
+    }
+    
+    // Se não tiver custo válido, não faz nada
+    if (isNaN(custo) || custo <= 0) {
         return;
     }
     
