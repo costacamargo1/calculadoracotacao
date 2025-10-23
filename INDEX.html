@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-<head>
+    <head>
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
     <link rel="icon" href="/favicon.ico" sizes="any">
     <link rel="apple-touch-icon" href="/apple-touch-icon.png">
@@ -1157,14 +1157,14 @@ const elVE = document.getElementById('r_estimado');if (elVE) { const v = (docume
 function repetirValorPF() {
     const checkbox = document.getElementById('repetirPF');
     const valorPF = document.getElementById('valorPF').value;
-    
-    if (checkbox.checked && valorPF) {
+    if (checkbox && checkbox.checked && valorPF) {
         document.getElementById('valorVenda').value = valorPF;
     }
 }
+
 // === ICMS 0% + ISENTO/DESONERADO + REPASSE BLOQUEADO ===
 function atualizarICMS0ePMVG() {
-  calcularPMVG();
+  if (typeof calcularPMVG === 'function') calcularPMVG();
   atualizarBloqueioRepassePorIsento();
 }
 
@@ -1176,7 +1176,38 @@ function atualizarBloqueioRepassePorIsento() {
   var rIsento = document.getElementById('repasseIsento');
   if (!(r1075 && r1354 && rNaoSei && rIsento)) return;
 
-  function zerarCalculosPorBase() {
+  if (isento) {
+    // Marca automaticamente "SEM REPASSE - ISENTO" e bloqueia as opções
+    rIsento.disabled = false;
+    rIsento.checked = true;
+    r1075.checked = false; r1354.checked = false; rNaoSei.checked = false;
+    r1075.disabled = true;  r1354.disabled = true;  rNaoSei.disabled = true;
+    rIsento.disabled = true;
+  } else {
+    // Reativa opções; mantém 10,75% como padrão se nada estiver escolhido
+    r1075.disabled = false; r1354.disabled = false; rNaoSei.disabled = false;
+    rIsento.checked = false;
+    if (!r1075.checked && !r1354.checked && !rNaoSei.checked) {
+      r1075.checked = true;
+    }
+  }
+}
+
+// Atualiza a mensagem do aviso apenas com base nos checkboxes
+function atualizarAvisoPorChecks() {
+  var des = document.getElementById('chkDesonerado')?.checked;
+  var isento = document.getElementById('chkIsento')?.checked;
+  if (typeof atualizarAvisoPF !== 'function') return;
+  if (isento) {
+    atualizarAvisoPF(true, 'ISENTO');
+  } else if (des) {
+    atualizarAvisoPF(true, 'DESONERADO');
+  } else {
+    atualizarAvisoPF(false);
+  }
+}
+// ===== FUNÇÃO GLOBAL: zerarCalculosPorBase =====
+function zerarCalculosPorBase() {
   // Zera inputs calculados
   ['valorICMS0','valorPMVG','valorPMVG0','custoProduto','valorPF']
     .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
@@ -1195,51 +1226,33 @@ function atualizarBloqueioRepassePorIsento() {
     .forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
 
   // Some com o aviso da calculadora 2
-  if (typeof atualizarAvisoPF === 'function') atualizarAvisoPF(false);
+  if (typeof atualizarAvisoPorChecks === 'function') atualizarAvisoPorChecks();
 }
 
-
-  if (isento) {
-    // Marca automaticamente "SEM REPASSE - ISENTO" e bloqueia todas as opções
-    rIsento.disabled = false; // habilita para poder marcar via script
-    rIsento.checked = true;
-    r1075.checked = false; r1354.checked = false; rNaoSei.checked = false;
-    r1075.disabled = true; r1354.disabled = true; rNaoSei.disabled = true;
-    rIsento.disabled = true; // volta a bloquear para o usuário
-  } else {
-    // Reativa as opções e mantém 10,75% como padrão
-    r1075.disabled = false; r1354.disabled = false; rNaoSei.disabled = false;
-    rIsento.checked = false;
-    if (!r1075.checked && !r1354.checked && !rNaoSei.checked) {
-      r1075.checked = true;
-    }
-  }
-}
-
-// Eventos
-window.addEventListener('load', function() {
-  var base = document.getElementById('basePF');
-  if (base) base.addEventListener('input', atualizarICMS0ePMVG);
-
-  var capSim = document.getElementById('capSim');
-  var capNao = document.getElementById('capNao');
-  if (capSim) capSim.addEventListener('change', atualizarICMS0ePMVG);
-  if (capNao) capNao.addEventListener('change', function(){
-    // Ao desmarcar CAP, esconder o campo PMVG para evitar confusão
-    var pmvgBox = document.getElementById('campoPMVG');
-    if (pmvgBox) pmvgBox.style.display = 'none';
-  });
-
+/* === Eventos: MUTUAL EXCLUSIVE para DESONERADO x ISENTO === */
+window.addEventListener('load', function () {
   var chkDes = document.getElementById('chkDesonerado');
-  var chkIs = document.getElementById('chkIsento');
-  if (chkDes) chkDes.addEventListener('change', function(){ atualizarICMS0ePMVG(); });
-  if (chkIs) chkIs.addEventListener('change', function(){ atualizarICMS0ePMVG(); atualizarBloqueioRepassePorIsento(); });
+  var chkIs  = document.getElementById('chkIsento');
 
-  // Estado inicial do REPASSE (10,75% por padrão)
+  function aplicaExclusividade(source, target) {
+    if (!source || !target) return;
+    if (source.checked) {
+      target.checked = false;   // desmarca o outro
+    }
+    atualizarICMS0ePMVG();      // recalcula e aplica bloqueios (repasse p/ ISENTO)
+    if (typeof atualizarAvisoPorChecks === 'function') atualizarAvisoPorChecks();
+  }
+
+  if (chkDes && chkIs) {
+    chkDes.addEventListener('change', function(){ aplicaExclusividade(chkDes, chkIs); });
+    chkIs .addEventListener('change', function(){ aplicaExclusividade(chkIs , chkDes); });
+  }
+
+  if (typeof atualizarAvisoPorChecks === 'function') atualizarAvisoPorChecks();
+  // Estado inicial do REPASSE conforme ISENTO
   atualizarBloqueioRepassePorIsento();
 });
 </script>
-
 <script>
 // --- Gera o PDF do bloco de Resumo visível ---
 function gerarPDFResumo() {
