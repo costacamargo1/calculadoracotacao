@@ -1,0 +1,1220 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Custo e Margens</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        
+        
+    :root{
+    /* amostras aproximadas da imagem */
+     --bg-top: #91A5A8; /* azul-cinza frio */
+     --bg-mid: #9C9993; /* greige quente */
+     --bg-bot: #60575F; /* cinza-ameixa suave */
+}
+
+    /* fallback sólido caso o gradiente não carregue */
+    body{ background-color: var(--bg-mid); }
+
+    body{
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+     background-image:
+        radial-gradient(120% 80% at 50% -10%, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0.00) 50%),
+        linear-gradient(180deg, var(--bg-top) 0%, var(--bg-mid) 55%, var(--bg-bot) 100%);
+        background-attachment: fixed;
+        background-repeat: no-repeat;
+        padding: 20px;
+        min-height: 100vh;
+}
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        
+        .calculator {
+            background: radial-gradient(1200px 600px at 50% -10%, #EEEDE9 0%, #F5F4F1 40%, #F5F4F1 100%);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        
+        h1 {
+            color: #323336;
+            margin-bottom: 10px;
+            font-size: 24px;
+        }
+        
+        h2 {
+            color: #323336;
+            margin-bottom: 20px;
+            font-size: 20px;
+            border-bottom: 2px solid #2b2929;
+            padding-bottom: 10px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        input[type="number"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #aaa8a8;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .radio-group {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .radio-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        input[type="radio"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+        
+        .checkbox-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        
+        input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+        
+        .result-box {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding: 10px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 5px;
+        }
+        
+        .result-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .result-label {
+            font-weight: 600;
+        }
+        
+        .result-value {
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        .positive {
+            color: #4ade80;
+        }
+        
+        .negative {
+            color: #f87171;
+        }
+        
+        .warning {
+            color: #fbbf24;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #000000 0%, #343235 100%);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .divider {
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #161822, transparent);
+            margin: 30px 0;
+        }
+        
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+        }
+    
+        /* Alinhamento Base PF + Valor ICMS 0% */
+.two-col { 
+    display: grid; 
+    grid-template-columns: 1fr 1fr; 
+    gap: 20px;
+}
+
+.two-col .col { 
+    display: flex;
+    flex-direction: column;
+}
+
+.two-col .col label {
+    display: block;
+    margin-bottom: 8px;
+    color: #333;
+    font-weight: 600;
+    font-size: 14px;
+    min-height: 40px; /* Garante espaço igual para ambos os labels */
+}
+
+.two-col .col input[type="number"] {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 16px;
+    transition: border-color 0.3s;
+}
+
+.two-col .col input[type="number"]:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+.checks { 
+    margin-top: 8px; 
+    display: flex; 
+    gap: 16px; 
+    font-size: 14px; 
+}
+
+.check { 
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.check input { 
+    margin: 0;
+    width: 18px;
+    height: 18px;
+}
+
+@media (max-width: 768px) {
+    .two-col {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+
+    <style>
+        /* Estilos que serão aplicados APENAS no PDF */
+        #relatorio-pdf h1 { font-size: 20px; text-align: center; margin-bottom: 20px; color: #333; border-bottom: 2px solid #000000; padding-bottom: 10px; }
+        #relatorio-pdf h2 { font-size: 16px; margin-top: 25px; margin-bottom: 10px; color: #444; border-bottom: 1px solid #000000; padding-bottom: 5px;}
+        #relatorio-pdf table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        #relatorio-pdf th, #relatorio-pdf td { border: 1px solid #000000; padding: 8px; text-align: left; }
+        #relatorio-pdf th { background-color: #000000; font-weight: bold; }
+        #relatorio-pdf .label { font-weight: bold; width: 60%; }
+        #relatorio-pdf .valor { text-align: right; }
+        #relatorio-pdf .destaque-positivo { color: #28a745; font-weight: bold; }
+        #relatorio-pdf .destaque-negativo { color: #dc3545; font-weight: bold; }
+    </style>
+<style>
+  /* Resumo visível para geração do PDF */
+  #resumoArea { 
+    background: #ffffff;
+    border: 1px solid #000000;
+    border-radius: 10px;
+    padding: 16px;
+    margin-top: 16px;
+    color: #000 !important; /* Força a cor preta */
+  }
+  #resumoArea h3 {
+    margin-bottom: 10px;
+    text-align: center;
+  }
+  #resumoArea tr.espaco td {
+    height: 12px;
+    padding: 0;
+    border: none;
+    background: transparent !important;
+}
+  #resumoArea table { width: 100%; border-collapse: collapse; }
+  #resumoArea td { border: 1px solid #000000; padding: 8px; }
+  #resumoArea td.label { font-weight: 600; }
+  #resumoArea td.valor { text-align: right; }
+  #btnGerarPDFResumo { margin-top: 12px; padding: 8px 12px; }
+
+footer {
+    text-align: center;
+    padding: 30px;
+    margin-top: 50px;
+    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
+      border-radius: 16px;
+  overflow: hidden;
+}
+
+footer span {
+    color: #9ca3af;
+    font-size: 13px;
+    font-weight: 400;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    font-family: 'Inter', 'Segoe UI', sans-serif;
+    
+}
+
+footer strong {
+    color: #f5f5f5;
+    font-size: 13px;
+    font-weight: 600;
+    margin-left: 5px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    font-family: 'Inter', 'Segoe UI', sans-serif;
+    position: relative;
+}
+
+footer strong::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #667eea, transparent);
+}
+
+
+/* Botão flutuante fixo */
+.btn-flutuante {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: auto;
+    min-width: 80px;
+    height: 50px;
+    padding: 0 20px;
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: white;
+    border: none;
+    border-radius: 25px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
+    transition: all 0.3s;
+    z-index: 1000;
+}
+
+.btn-flutuante:hover {
+    transform: translateY(-5px) scale(1.1);
+    box-shadow: 0 6px 20px rgba(239, 68, 68, 0.6);
+}
+
+.btn-flutuante:active {
+    transform: translateY(-2px) scale(1.05);
+}
+
+/* Tooltip no hover */
+.btn-flutuante::before {
+    content: 'Limpar Tudo';
+    position: absolute;
+    right: 70px;
+    background: #333;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 14px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+}
+
+.btn-flutuante:hover::before {
+    opacity: 1;
+}
+</style>
+<style>
+  .topbar { display:flex; align-items:center; justify-content:space-between; gap:16px; }
+  .produto-field { display:flex; align-items:center; gap:8px; }
+  .produto-field label{
+  font-weight:600;
+  color:#000;
+  white-space:nowrap;
+  margin:0;
+  line-height:1;            /* evita deslocamento vertical */
+  display:flex;             /* garante centragem perfeita */
+  align-items:center;
+}
+  .produto-field input{
+  height:35px;              /* altura consistente */
+  padding:0 10px;           /* com height fixa, zere o padding vertical */
+  border:1px solid #000;
+  border-radius:6px;
+  min-width:260px;
+  appearance:none;
+  -webkit-appearance:none;  /* Safari */
+}
+
+
+
+</style>
+</head>
+<body>
+    <div class="container">
+        <!-- CALCULADORA 1: CÁLCULO DO CUSTO -->
+        <div class="calculator">
+            <div class="topbar"><h1>📊 Calculadora de Custo e Margens - teste</h1><div class="produto-field"><label for="produtoNome">PRODUTO:</label><input type="text" id="produtoNome" placeholder="Ex.: MESALAZINA 1G SUPOSITÓRIO"></div></div>
+            <h2>1️⃣ CÁLCULO DE CUSTO DO PRODUTO</h2>
+            
+            <div class="form-group two-col">
+  <div class="col">
+    <label>BASE DE CÁLCULO PF (R$):<br><em>• Para base, considerar ICMS 17% - ES</em></label>
+    <input type="number" id="basePF" step="0.0001" placeholder="Inserir PF 17%">
+    <div class="checks">
+      <label class="check"><input type="checkbox" id="chkDesonerado"> DESONERADO (87/02)</label>
+      <label class="check"><input type="checkbox" id="chkIsento"> ISENTO (162/94 OU 140/01)</label>
+    </div>
+  </div>
+  <div class="col">
+    <label>VALOR ICMS 0% (R$):</label>
+    <input type="number" id="valorICMS0" step="0.0001" placeholder="VALOR ICMS 0">
+  </div>
+</div>
+
+           <div class="form-group">
+                <label>CAP 21,53%:</label>
+                <div class="radio-group">
+                    <div class="radio-option">
+                        <input type="radio" id="capSim" name="cap" value="sim" onchange="calcularPMVG()">
+                        <label for="capSim" style="margin: 0;">SIM</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" id="capNao" name="cap" value="nao" checked onchange="limparPMVG()">
+                        <label for="capNao" style="margin: 0;">NÃO</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group" id="campoPMVG" style="display: none;">
+                <label>VALOR DE VENDA - PMVG (21,53%) - R$:</label>
+                <input type="number" id="valorPMVG" step="0.0001" placeholder="Calculado automaticamente ou inserido manualmente">
+            </div>
+            
+            <div class="form-group">
+                <label>DESCONTO (%):</label>
+                <input type="number" id="desconto" step="0.01" placeholder="Inserir desconto comercial recebido na cotação">
+            </div>
+ 
+            
+            <div class="form-group">
+                <label>REPASSE:<br> <em>• Produto nacional: 10,75% - Produto Importado: 13,54%</em></label>
+                <div class="radio-group">
+                    <div class="radio-option">
+                        <input type="radio" id="repasse1075" name="repasse" value="10.75" checked>
+                        <label for="repasse1075" style="margin: 0;">10,75%</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" id="repasse1354" name="repasse" value="13.54">
+                        <label for="repasse1354" style="margin: 0;">13,54%</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" id="repasseNaoSei" name="repasse" value="0">
+                        <label for="repasseNaoSei" style="margin: 0;">SEM INFORMAÇÃO</label>
+                    </div>
+                    <div class="radio-option" title="Marcado automaticamente quando [X] ISENTO">
+                        <input type="radio" id="repasseIsento" name="repasse" value="0" disabled>
+                        <label for="repasseIsento" style="margin: 0;">SEM REPASSE - ISENTO</label>
+                    </div>
+                </div>
+                <div style="text-align: center;">
+<button onclick="calcularCusto()" style="margin: 30px 0 -30px 0;">CALCULAR CUSTO</button>
+                </div>
+            </div></div>
+            
+            
+            
+            <div class="result-box" id="resultadoCusto" style="display: none;">
+<div class="result-item">
+                    <span class="result-label">VALOR DE CUSTO R$:</span>
+                    <span class="result-value" id="valorCusto">R$ 0,0000</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">MARGEM → CUSTO X BASE PF:</span>
+                    <span class="result-value" id="margemBaseCusto">0,00%</span>
+                </div>
+                <div class="result-item" id="itemPMVGCusto" style="display: none;">
+                    <span class="result-label">MARGEM → CUSTO X PMVG:</span>
+                    <span class="result-value" id="margemPMVGCusto">0,00%</span>
+                </div>
+
+                
+            </div>
+            <div style="text-align: left; margin-top: 20px;">
+            
+        
+        <div class="divider"></div>
+        
+        <!-- CALCULADORA 2: MARGENS E DEFASAGENS -->
+        <div class="calculator">
+            <h2>2️⃣ CÁLCULO DE MARGENS E DEFASAGENS</h2>
+            
+            <div class="form-group">
+                <label>VALOR DE CUSTO (R$):</label>
+                <input type="number" id="custoProduto" step="0.0001" placeholder="Valor de custo será importado automaticamente. Poderá ser inserido de forma manual.">
+            </div>
+            
+            <div class="form-group">
+                <label>VALOR DO PF OU PMVG (R$):</label>
+                <input type="number" id="valorPF" step="0.0001" placeholder="Valor será importado automaticamente. Poderá ser inserido de forma manual.">
+            </div>
+            
+            <div class="form-group">
+                <label>VALOR DE VENDA (R$):</label>
+                <input type="number" id="valorVenda" step="0.0001" placeholder="Inserir valor de venda">
+                <div class="checkbox-option">
+                    <input type="checkbox" id="repetirPF" onchange="repetirValorPF()">
+                    <label for="repetirPF" style="margin: 0;">REPETIR PF</label>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>VALOR ESTIMADO (R$):</label>
+                <input type="number" id="valorEstimado" step="0.0001" placeholder="Se houver, inserir valor estimado.">
+            </div>
+            <div style="text-align: center;">
+            <button onclick="calcularMargens()">CALCULAR MARGENS</button>
+            </div>
+<div class="result-box" id="resultadoMargens" style="display: none;">
+<div class="result-item">
+                    <span class="result-label">MARGEM → CUSTO X VALOR DE VENDA:</span>
+                    <span class="result-value" id="margemVendaCusto">0,00%</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">MARGEM → CUSTO X VALOR ESTIMADO:</span>
+                    <span class="result-value" id="margemEstimadoCusto">0,00%</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">MARGEM → CUSTO X VALOR DO PF OU PMVG:</span>
+                    <span class="result-value" id="margemPFPmvgCusto">0,00%</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">DIFERENÇA PERCENTUAL → VALOR DE VENDA X ESTIMADO:</span>
+                    <span class="result-value" id="margemVendaEstimado">0,00%</span>
+                </div>
+<div id="resumoArea" style="display:none;">
+  <h3>RELATÓRIO DE CUSTO DO PRODUTO</h3>
+  <table>
+    <tr><td class="label">PRODUTO</td><td class="valor" id="r_produto"></td></tr>
+    <tr class="espaco"><td colspan="2"></td></tr>
+    <tr><td class="label">BASE DE CÁLCULO PF (R$)</td><td class="valor" id="r_pf"></td></tr>
+    <tr><td class="label">DESCONTO (%)</td><td class="valor" id="r_desc"></td></tr>
+    <tr><td class="label">CAP 21,53%</td><td class="valor" id="r_cap"></td></tr>
+    <tr><td class="label">REPASSE (%)</td><td class="valor" id="r_repasse"></td></tr>
+    <tr><td class="label">DESONERADO</td><td class="valor" id="r_desonerado"></td></tr>
+    <tr><td class="label">ISENTO</td><td class="valor" id="r_isento"></td></tr>
+    <tr class="espaco"><td colspan="2"></td></tr>
+    <tr><td class="label">VALOR DE CUSTO (R$)</td><td class="valor" id="r_custo"></td></tr>
+    <tr class="espaco"><td colspan="2"></td></tr>
+    <tr><td class="label">VALOR DE VENDA (R$)</td><td class="valor" id="r_valorvenda"></td></tr>
+    <tr><td class="label">VALOR PMVG (R$)</td><td class="valor" id="r_pmvg"></td></tr>
+    <tr><td class="label">VALOR ESTIMADO (R$)</td><td class="valor" id="r_estimado"></td></tr>
+    <tr class="espaco"><td colspan="2"></td></tr>
+    <tr><td class="label">MARGEM → CUSTO X VALOR DE VENDA</td><td class="valor" id="r_m_vc"></td></tr>
+    <tr><td class="label">MARGEM → CUSTO X VALOR ESTIMADO</td><td class="valor" id="r_m_ec"></td></tr>
+    <tr><td class="label">MARGEM → CUSTO X VALOR DO PF OU PMVG</td><td class="valor" id="r_m_pfpmvg"></td></tr>
+    <tr><td class="label">DIFERENÇA % → VALOR DE VENDA X ESTIMADO</td><td class="valor" id="r_m_ve"></td></tr>
+
+
+  </table>
+  <div style="text-align:center;">
+    <button id="btnGerarPDFResumo">📄 GERAR RELATÓRIO</button>
+  </div>
+</div>
+
+            
+
+                
+</div>
+
+
+    <button id="btnGerarPDF">📄 Gerar PDF para Impressão</button>
+</div>
+        </div>
+    </div>
+ <div id="relatorio-pdf" style="display: none; font-family: Arial, sans-serif; color: #000;">
+
+    <h1>Relatório de Análise de Custos e Margens</h1>
+
+    <h2>1. Dados de Entrada para Custo</h2>
+    <table>
+        <tr><td class="label">Produto</td><td class="valor" id="pdfProdutoNome"></td></tr>
+<tr>
+            <td class="label">Base de Cálculo PF (R$)</td>
+            <td class="valor" id="pdfBasePF"></td>
+        </tr>
+        <tr>
+            <td class="label">Desconto Aplicado (%)</td>
+            <td class="valor" id="pdfDesconto"></td>
+        </tr>
+        <tr>
+            <td class="label">Aplica CAP (21,53%)?</td>
+            <td class="valor" id="pdfAplicaCAP"></td>
+        </tr>
+        <tr>
+            <td class="label">Valor de Venda PMVG (R$)</td>
+            <td class="valor" id="pdfValorPMVG"></td>
+        </tr>
+        <tr>
+            <td class="label">Repasse (%)</td>
+            <td class="valor" id="pdfRepasse"></td>
+        </tr>
+    </table>
+
+    <h2>2. Resultados do Custo do Produto</h2>
+    <table>
+        <tr>
+            <td class="label">VALOR DE CUSTO FINAL (R$)</td>
+            <td class="valor"><b id="pdfCustoFinal"></b></td>
+        </tr>
+        <tr>
+            <td class="label">MARGEM (Custo x Base PF)</td>
+            <td class="valor" id="pdfMargemBaseCusto"></td>
+        </tr>
+        <tr>
+            <td class="label">MARGEM (Custo x PMVG)</td>
+            <td class="valor" id="pdfMargemPMVGCusto"></td>
+        </tr>
+    </table>
+
+    <h2>3. Análise de Margens e Defasagens</h2>
+    <table>
+         <tr>
+            <td class="label">Valor de Venda Praticado (R$)</td>
+            <td class="valor" id="pdfValorVenda"></td>
+        </tr>
+         <tr>
+            <td class="label">Valor Estimado / Concorrência (R$)</td>
+            <td class="valor" id="pdfValorEstimado"></td>
+        </tr>
+        <tr>
+            <td class="label">MARGEM (Custo x Venda)</td>
+            <td class="valor" id="pdfMargemVendaCusto"></td>
+        </tr>
+        <tr>
+            <td class="label">MARGEM (Custo x Estimado)</td>
+            <td class="valor" id="pdfMargemEstimadoCusto"></td>
+        </tr>
+        <tr>
+            <td class="label">DIFERENÇA (Venda x Estimado)</td>
+            <td class="valor" id="pdfMargemVendaEstimado"></td>
+        </tr>
+    </table>
+</div>
+
+    <script>
+
+// Função para gerar o PDF formatado como um relatório
+function gerarPDF() {
+    // --- VERIFICA SE OS RESULTADOS ESTÃO VISÍVEIS ---
+    const resultadoCustoVisivel = document.getElementById('resultadoCusto').style.display !== 'none';
+    const resultadoMargensVisivel = document.getElementById('resultadoMargens').style.display !== 'none';
+
+    // --- COLETA DE DADOS DE ENTRADA (SEMPRE SEGURO) ---
+    const basePF = document.getElementById('basePF').value || "0.0000";
+    const desconto = (document.getElementById('desconto').value || "0") + "%";
+    const aplicaCAP = document.getElementById('capSim').checked ? "SIM" : "NÃO";
+    const valorPMVG = document.getElementById('valorPMVG').value || "N/A";
+    const repasseElement = document.querySelector('input[name="repasse"]:checked');
+    const repasse = repasseElement ? repasseElement.value + "%" : "N/A";
+    const valorVenda = document.getElementById('valorVenda').value || "0.0000";
+    const valorEstimado = document.getElementById('valorEstimado').value || "0.0000";
+
+    // --- COLETA DE RESULTADOS (APENAS SE ESTIVEREM VISÍVEIS) ---
+    const custoFinal = resultadoCustoVisivel ? document.getElementById('valorCusto').textContent : "N/A";
+    const margemBaseCusto = resultadoCustoVisivel ? document.getElementById('margemBaseCusto').textContent : "N/A";
+    const margemPMVGCusto = document.getElementById('itemPMVGCusto').style.display === 'flex' ? document.getElementById('margemPMVGCusto').textContent : "N/A";
+    
+    const margemVendaCusto = resultadoMargensVisivel ? document.getElementById('margemVendaCusto').textContent : "N/A";
+    const margemEstimadoCusto = resultadoMargensVisivel ? document.getElementById('margemEstimadoCusto').textContent : "N/A";
+    const margemVendaEstimado = resultadoMargensVisivel ? document.getElementById('margemVendaEstimado').textContent : "N/A";
+
+    // --- PREENCHIMENTO DA ESTRUTURA INVISÍVEL ---
+    const prodNomeVal = (document.getElementById('produtoNome') ? document.getElementById('produtoNome').value : '');
+    if (document.getElementById('pdfProdutoNome')) document.getElementById('pdfProdutoNome').innerText = prodNomeVal;
+    document.getElementById('pdfBasePF').innerText = basePF;
+    document.getElementById('pdfDesconto').innerText = desconto;
+    document.getElementById('pdfAplicaCAP').innerText = aplicaCAP;
+    document.getElementById('pdfValorPMVG').innerText = valorPMVG;
+    if (document.getElementById('pdfValorEstimado')) document.getElementById('pdfValorEstimado').innerText = valorEstimado;
+    document.getElementById('pdfRepasse').innerText = repasse;
+    document.getElementById('pdfCustoFinal').innerText = custoFinal;
+    document.getElementById('pdfMargemBaseCusto').innerText = margemBaseCusto;
+    document.getElementById('pdfMargemPMVGCusto').innerText = margemPMVGCusto;
+    document.getElementById('pdfValorVenda').innerText = valorVenda;
+    document.getElementById('pdfValorEstimado').innerText = valorEstimado;
+    document.getElementById('pdfMargemVendaCusto').innerText = margemVendaCusto;
+    document.getElementById('pdfMargemEstimadoCusto').innerText = margemEstimadoCusto;
+    document.getElementById('pdfMargemVendaEstimado').innerText = margemVendaEstimado;
+    
+    // --- GERAÇÃO DO PDF ---
+    const elementoParaPDF = document.getElementById("relatorio-pdf");
+
+// Salva o estilo anterior para restaurar depois
+const estiloAnterior = elementoParaPDF.getAttribute('style') || '';
+
+// Tira de display:none e posiciona fora da tela para garantir layout/reflow
+elementoParaPDF.setAttribute(
+  'style',
+  (estiloAnterior ? estiloAnterior + '; ' : '') +
+  'display:block !important; position:fixed; left:-10000px; top:0; ' +
+  'background:#ffffff; width:auto; max-width:100%;'
+);
+
+// Aguarda um frame para o layout "assentar" antes da captura
+requestAnimationFrame(() => {
+  const opcoes = {
+    margin: [0.5, 0.5, 0.5, 0.5],
+    filename: 'Relatorio_Custos_e_Margens.pdf',
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2, useCORS: true, scrollX: 0, scrollY: 0, backgroundColor: '#ffffff' },
+    jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+  };
+
+  html2pdf().set(opcoes).from(elementoParaPDF).save()
+    .then(() => {
+      elementoParaPDF.setAttribute('style', estiloAnterior);
+    })
+    .catch((err) => {
+      elementoParaPDF.setAttribute('style', estiloAnterior);
+      console.error(err);
+      alert('Falha ao gerar PDF: ' + (err && err.message ? err.message : err));
+    });
+});
+}
+
+// Adiciona o "escutador de evento" ao botão que criamos
+document.getElementById('btnGerarPDF').addEventListener('click', gerarPDF);
+        
+function calcularPMVG() {
+  const basePFEl = document.getElementById('basePF');
+  const basePF = parseFloat(basePFEl ? basePFEl.value : '');
+  const campoPMVG = document.getElementById('campoPMVG');
+
+  const des = document.getElementById('chkDesonerado')?.checked || false;
+  const isento = document.getElementById('chkIsento')?.checked || false;
+  const capAtivo = document.getElementById('capSim')?.checked || false;
+
+  if (!capAtivo) return;
+
+  if (campoPMVG) campoPMVG.style.display = 'block';
+  if (isNaN(basePF) || basePF <= 0) return;
+
+  // Atualiza o VALOR ICMS 0% apenas para exibição (0,83 x BASE PF)
+  const icms0El = document.getElementById('valorICMS0');
+  const valorICMS0 = +(basePF * 0.83).toFixed(4);
+  if (icms0El) icms0El.value = valorICMS0.toFixed(4);
+
+  let pmvg;
+
+  if (des) {
+    // ✅ DESONERADO: CAP em cima da BASE PF (ex.: 1,00 → 0,7847)
+    pmvg = basePF * (1 - 21.53 / 100);
+    document.getElementById('valorPMVG').value = pmvg.toFixed(4);
+  } else if (isento) {
+    // ISENTO (mantém lógica anterior): CAP sobre VALOR ICMS 0%
+    pmvg = valorICMS0 * (1 - 21.53 / 100);
+    document.getElementById('valorPMVG').value = pmvg.toFixed(4);
+  } else {
+    // Caso normal: CAP sobre BASE PF com truncamento de 4 casas
+    const bruto = basePF * (1 - 21.53 / 100);
+    const truncado = Math.trunc(bruto * 10000) / 10000;
+    document.getElementById('valorPMVG').value = truncado.toFixed(4);
+  }
+
+  // Espelha o PMVG na Calculadora 2 quando CAP = SIM
+  const campoPF = document.getElementById('valorPF');
+  if (campoPF) {
+    campoPF.value = document.getElementById('valorPMVG').value;
+  }
+}
+
+        
+        function limparPMVG() {
+            document.getElementById('campoPMVG').style.display = 'none';
+            document.getElementById('valorPMVG').value = '';
+            document.getElementById('itemPMVGCusto').style.display = 'none';
+        }
+        
+        // Recalcular PMVG quando base PF ou desconto mudarem
+        document.getElementById('basePF').addEventListener('input', function() {
+            if (document.getElementById('capSim').checked) {
+                calcularPMVG();
+            }
+        });
+
+        // Mantém PF/PMVG sincronizados ao editar o PMVG manualmente, quando CAP = SIM
+        document.getElementById('valorPMVG').addEventListener('input', function(){
+            if (document.getElementById('capSim').checked) {
+                document.getElementById('valorPF').value = this.value;
+            }
+        });
+
+        // Recalcular PMVG quando o desconto mudar (sincroniza PF também)
+        document.getElementById('desconto').addEventListener('input', function(){
+            if (document.getElementById('capSim').checked) {
+                calcularPMVG();
+            }
+        });
+
+        // Mantém o valor de venda igual ao PF quando 'Repetir PF' estiver marcado
+        document.getElementById('valorPF').addEventListener('input', function(){
+            if (document.getElementById('repetirPF').checked) {
+                document.getElementById('valorVenda').value = this.value;
+            }
+        });
+
+        
+        
+ function calcularCusto() {
+    const basePF = parseFloat(document.getElementById('basePF').value);
+    const desconto = parseFloat(document.getElementById('desconto').value);
+    const capSim = document.getElementById('capSim').checked;
+    const selecionadoRep = document.querySelector('input[name="repasse"]:checked');
+    const repasseSelecionado = selecionadoRep ? selecionadoRep.value : '0';
+    let repasse = parseFloat(repasseSelecionado);
+    
+    const isento = document.getElementById('chkIsento') && document.getElementById('chkIsento').checked;
+    const desonerado = document.getElementById('chkDesonerado') && document.getElementById('chkDesonerado').checked;
+    const valorICMS0 = parseFloat(document.getElementById('valorICMS0').value);
+    
+    if (isento) { repasse = 0; }
+    
+    // VALIDAÇÃO AJUSTADA: Permite cálculo se tiver BASE PF OU VALOR ICMS 0%
+    const temBasePF = !isNaN(basePF);
+    const temICMS0 = !isNaN(valorICMS0) && valorICMS0 > 0;
+    
+    if ((!temBasePF && !temICMS0) || isNaN(desconto)) {
+        alert('Por favor, preencha a Base de Cálculo PF (ou VALOR ICMS 0%) e o Desconto.');
+        return;
+    }
+    
+    // LÓGICA AJUSTADA: Define qual será a base para o cálculo
+    let baseCalculo;
+    
+    if (isento && temICMS0) {
+        // Se ISENTO e tem VALOR ICMS 0%, usa ele como base
+        baseCalculo = valorICMS0;
+    } else if (temBasePF) {
+        // Se tem BASE PF, usa ela
+        baseCalculo = basePF;
+    } else {
+        alert('Por favor, preencha a Base de Cálculo PF ou o VALOR ICMS 0%.');
+        return;
+    }
+    
+    let valorAtual = baseCalculo;
+    
+    // Aplicar desconto
+    valorAtual = valorAtual * (1 - desconto / 100);
+    
+    // Aplicar CAP se selecionado
+    if (capSim) {
+        valorAtual = valorAtual * (1 - 21.53 / 100);
+    }
+    
+    // Aplicar Repasse se não for "NÃO SEI"
+    if (repasse > 0) {
+        valorAtual = valorAtual * (1 - repasse / 100);
+    }
+    
+    const valorCusto = valorAtual;
+    // FÓRMULA CORRIGIDA: Margem sobre o custo, usando a BASE correta
+    const margemPercent = ((baseCalculo - valorCusto) / valorCusto) * 100;
+    
+    // Exibir resultados
+    document.getElementById('valorCusto').textContent = `R$ ${valorCusto.toFixed(4)}`;
+    
+    const elementoMargem = document.getElementById('margemBaseCusto');
+    elementoMargem.textContent = `${margemPercent.toFixed(2)}%`;
+    
+    // Aplicar cor baseado na margem
+    if (margemPercent < 0) {
+        elementoMargem.className = 'result-value negative';
+    } else if (margemPercent < 25) {
+        elementoMargem.className = 'result-value warning';
+    } else {
+        elementoMargem.className = 'result-value positive';
+    }
+    
+    // Calcular PMVG x Custo se PMVG existir
+    const valorPMVG = parseFloat(document.getElementById('valorPMVG').value);
+    if (!isNaN(valorPMVG) && valorPMVG > 0) {
+        const margemPMVGReal = valorPMVG - valorCusto;
+        const margemPMVGPercent = (margemPMVGReal / valorCusto) * 100;
+        
+        const elementoPMVG = document.getElementById('margemPMVGCusto');
+        elementoPMVG.textContent = `${margemPMVGPercent.toFixed(2)}%`;
+        
+        // Aplicar cor baseado na margem
+        if (margemPMVGPercent < 0) {
+            elementoPMVG.className = 'result-value negative';
+        } else if (margemPMVGPercent < 25) {
+            elementoPMVG.className = 'result-value warning';
+        } else {
+            elementoPMVG.className = 'result-value positive';
+        }
+        
+        document.getElementById('itemPMVGCusto').style.display = 'flex';
+    } else {
+        document.getElementById('itemPMVGCusto').style.display = 'none';
+    }
+    
+    document.getElementById('resultadoCusto').style.display = 'block';
+    
+    // Auto-preencher na calculadora 2
+    document.getElementById('custoProduto').value = valorCusto.toFixed(4);
+}
+
+function limparTudo() {
+    // Confirma antes de limpar
+    if (!confirm('Deseja realmente limpar todos os campos?')) {
+        return;
+    }
+        // Limpa com verificação
+    const campos = ['produtoNome', 'basePF', 'valorICMS0', 'desconto', 'valorPMVG', 
+                    'custoProduto', 'valorPF', 'valorVenda', 'valorEstimado'];
+    
+    campos.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+    });
+    
+    // Limpa campos de texto e número
+    document.getElementById('produtoNome').value = '';
+    document.getElementById('basePF').value = '';
+    document.getElementById('valorICMS0').value = '';
+    document.getElementById('desconto').value = '';
+    document.getElementById('valorPMVG').value = '';
+    document.getElementById('custoProduto').value = '';
+    document.getElementById('valorPF').value = '';
+    document.getElementById('valorVenda').value = '';
+    document.getElementById('valorEstimado').value = '';
+    
+    // Desmarca checkboxes
+    document.getElementById('chkDesonerado').checked = false;
+    document.getElementById('chkIsento').checked = false;
+    document.getElementById('repetirPF').checked = false;
+    
+    // Reseta radio buttons para valores padrão
+    document.getElementById('capNao').checked = true;
+    document.getElementById('repasse1075').checked = true;
+    
+    // Reabilita opções de repasse
+    document.getElementById('repasse1075').disabled = false;
+    document.getElementById('repasse1354').disabled = false;
+    document.getElementById('repasseNaoSei').disabled = false;
+    
+    // Esconde resultados
+    document.getElementById('resultadoCusto').style.display = 'none';
+    document.getElementById('resultadoMargens').style.display = 'none';
+    document.getElementById('resumoArea').style.display = 'none';
+    document.getElementById('campoPMVG').style.display = 'none';
+    
+    // Foca no primeiro campo
+    document.getElementById('produtoNome').focus();
+}
+
+
+function calcularMargens() {
+    const custo = parseFloat(document.getElementById('custoProduto').value);
+    const venda = parseFloat(document.getElementById('valorVenda').value);
+    const pfpmvg = parseFloat(document.getElementById('valorPF').value);
+    const estimado = parseFloat(document.getElementById('valorEstimado').value);
+    
+    // Elementos do resultado
+    const resultadoMargens = document.getElementById('resultadoMargens');
+    const elementoVC = document.getElementById('margemVendaCusto');
+    const elementoEC = document.getElementById('margemEstimadoCusto');
+    const elementoVE = document.getElementById('margemVendaEstimado');
+    const elementoPF = document.getElementById('margemPFPmvgCusto');
+
+    // Função interna para aplicar estilo e texto
+    const atualizarMargem = (elemento, valor) => {
+        // Se o valor não for um número (NaN, Infinity), exibe 'N/A'
+        if (isNaN(valor) || !isFinite(valor)) {
+            elemento.textContent = 'N/A';
+            elemento.className = 'result-value'; // Estilo padrão
+            return;
+        }
+
+        elemento.textContent = `${valor.toFixed(2)}%`;
+        if (valor < 0) {
+            elemento.className = 'result-value negative';
+        } else if (valor < 25) {
+            elemento.className = 'result-value warning';
+        } else {
+            elemento.className = 'result-value positive';
+        }
+    };
+
+    // VERIFICAÇÃO PRINCIPAL: O custo deve ser um número válido e maior que zero.
+    if (isNaN(custo) || custo <= 0) {
+        // Se o custo for inválido, não podemos calcular as margens.
+        atualizarMargem(elementoVC, NaN);
+        atualizarMargem(elementoEC, NaN);
+    } else {
+        // Se o custo for válido, calcula as margens.
+        const margemVCPercent = ((venda - custo) / custo) * 100;
+        atualizarMargem(elementoVC, margemVCPercent);
+
+        const margemECPercent = ((estimado - custo) / custo) * 100;
+        atualizarMargem(elementoEC, margemECPercent);
+    
+        // Margem → Custo x Valor do PF ou PMVG
+        const margemPFPmvgPercent = ((pfpmvg - custo) / custo) * 100;
+        atualizarMargem(elementoPF, margemPFPmvgPercent);
+}
+
+    // A diferença Venda x Estimado não depende do custo, pode ser calculada separadamente
+    if (isNaN(estimado) || estimado === 0) {
+        atualizarMargem(elementoVE, NaN);
+    } else {
+        const margemVEPercent = ((venda - estimado) / estimado) * 100;
+        atualizarMargem(elementoVE, margemVEPercent);
+    }
+    
+    // Garante que a caixa de resultados SEMPRE apareça
+    
+// === Preenche o RESUMO para PDF ===
+    try {
+    const basePF = document.getElementById('basePF') ? (document.getElementById('basePF').value || "0.0000") : "N/A";
+    const desconto = document.getElementById('desconto') ? ((document.getElementById('desconto').value || "0") + "%") : "N/A";
+    const cap = document.getElementById('capSim') ? (document.getElementById('capSim').checked ? "SIM" : "NÃO") : "N/A";
+    const valorPMVG = document.getElementById('valorPMVG') ? (document.getElementById('valorPMVG').value || "N/A") : "N/A";
+    const repSel = document.querySelector('input[name="repasse"]:checked');
+    const repasse = repSel ? (repSel.value + "%") : "N/A";
+    const custoFinal = document.getElementById('valorCusto') ? (document.getElementById('valorCusto').textContent || "N/A") : "N/A";
+    const desonerado = document.getElementById('chkDesonerado')?.checked ? "SIM" : "NÃO";
+    const isento = document.getElementById('chkIsento')?.checked ? "SIM" : "NÃO";
+    const valorVenda = document.getElementById('valorVenda')?.value || "N/A";
+
+        // Usa os valores recém-calculados das margens
+    const vVC = document.getElementById('margemVendaCusto') ? document.getElementById('margemVendaCusto').textContent : "N/A";
+    const vEC = document.getElementById('margemEstimadoCusto') ? document.getElementById('margemEstimadoCusto').textContent : "N/A";
+    const vVE = document.getElementById('margemVendaEstimado') ? document.getElementById('margemVendaEstimado').textContent : "N/A";
+
+        // Preenche o resumo
+    const setTxt = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+    setTxt('r_produto', (document.getElementById('produtoNome') ? (document.getElementById('produtoNome').value || '—') : '—'));
+    setTxt('r_pf', basePF);
+    setTxt('r_desc', desconto);
+    setTxt('r_cap', cap);
+    setTxt('r_pmvg', valorPMVG);
+    setTxt('r_repasse', repasse);
+    setTxt('r_custo', custoFinal);
+    setTxt('r_desonerado', desonerado);
+    setTxt('r_isento', isento);
+    setTxt('r_valorvenda', valorVenda);
+    
+    setTxt('r_m_vc', vVC);
+    setTxt('r_m_ec', vEC);
+    setTxt('r_m_pfpmvg', (document.getElementById('margemPFPmvgCusto') ? document.getElementById('margemPFPmvgCusto').textContent : 'N/A'));
+    setTxt('r_m_ve', vVE);
+
+        // Exibe o resumo
+        const resumo = document.getElementById('resumoArea');
+        if (resumo) resumo.style.display = 'block';
+    } catch(e) {
+        console.warn('Não foi possível preencher o resumo:', e);
+    }
+const elVE = document.getElementById('r_estimado');if (elVE) { const v = (document.getElementById('valorEstimado') ? document.getElementById('valorEstimado').value : ''); elVE.textContent = v; }resultadoMargens.style.display = 'block';
+}
+        
+        // Adicionar listeners para cálculo em tempo real
+        document.getElementById('valorPF').addEventListener('input', function() {
+            if (document.getElementById('repetirPF').checked) {
+                repetirValorPF();
+            }
+        });
+    </script>
+<script>
+function repetirValorPF() {
+    const checkbox = document.getElementById('repetirPF');
+    const valorPF = document.getElementById('valorPF').value;
+    
+    if (checkbox.checked && valorPF) {
+        document.getElementById('valorVenda').value = valorPF;
+    }
+}
+// === ICMS 0% + ISENTO/DESONERADO + REPASSE BLOQUEADO ===
+function atualizarICMS0ePMVG() {
+  var base = parseFloat(document.getElementById('basePF').value);
+  var des = document.getElementById('chkDesonerado')?.checked; || false;
+  var isento = document.getElementById('chkIsento')?.checked;
+  var campo = document.getElementById('valorICMS0');
+  if (!campo) return;
+  if ((des || isento) && !isNaN(base)) {
+    var v = base * 0.83;
+    campo.value = v.toFixed(4);
+    if (document.getElementById('capSim') && document.getElementById('capSim').checked) {
+      // Deduz -21,53% de VALOR ICMS 0% para PMVG
+      var pmvg = v * (1 - 21.53/100);
+      var pmvgEl = document.getElementById('valorPMVG');
+      var pmvgBox = document.getElementById('campoPMVG');
+      if (pmvgBox) pmvgBox.style.display = 'block';
+      if (pmvgEl) pmvgEl.value = pmvg.toFixed(4);
+      // Espelhar no campo PF/PMVG da Calculadora 2 (se existir)
+      var campoPF = document.getElementById('valorPF');
+      if (campoPF) campoPF.value = pmvg.toFixed(4);
+      // Exibir item de margem PMVG x Custo quando houver
+      var itemPMVGCusto = document.getElementById('itemPMVGCusto');
+      if (itemPMVGCusto) itemPMVGCusto.style.display = 'flex';
+    }
+  } else {
+    campo.value = '';
+  }
+}
+
+function atualizarBloqueioRepassePorIsento() {
+  var isento = document.getElementById('chkIsento')?.checked;
+  var r1075 = document.getElementById('repasse1075');
+  var r1354 = document.getElementById('repasse1354');
+  var rNaoSei = document.getElementById('repasseNaoSei');
+  var rIsento = document.getElementById('repasseIsento');
+  if (!(r1075 && r1354 && rNaoSei && rIsento)) return;
+
+  if (isento) {
+    // Marca automaticamente "SEM REPASSE - ISENTO" e bloqueia todas as opções
+    rIsento.disabled = false; // habilita para poder marcar via script
+    rIsento.checked = true;
+    r1075.checked = false; r1354.checked = false; rNaoSei.checked = false;
+    r1075.disabled = true; r1354.disabled = true; rNaoSei.disabled = true;
+    rIsento.disabled = true; // volta a bloquear para o usuário
+  } else {
+    // Reativa as opções e mantém 10,75% como padrão
+    r1075.disabled = false; r1354.disabled = false; rNaoSei.disabled = false;
+    rIsento.checked = false;
+    if (!r1075.checked && !r1354.checked && !rNaoSei.checked) {
+      r1075.checked = true;
+    }
+  }
+}
+
+// Eventos
+window.addEventListener('load', function() {
+  var base = document.getElementById('basePF');
+  if (base) base.addEventListener('input', atualizarICMS0ePMVG);
+
+  var capSim = document.getElementById('capSim');
+  var capNao = document.getElementById('capNao');
+  if (capSim) capSim.addEventListener('change', atualizarICMS0ePMVG);
+  if (capNao) capNao.addEventListener('change', function(){
+    // Ao desmarcar CAP, esconder o campo PMVG para evitar confusão
+    var pmvgBox = document.getElementById('campoPMVG');
+    if (pmvgBox) pmvgBox.style.display = 'none';
+  });
+
+  var chkDes = document.getElementById('chkDesonerado');
+  var chkIs = document.getElementById('chkIsento');
+  if (chkDes) chkDes.addEventListener('change', function(){ atualizarICMS0ePMVG(); });
+  if (chkIs) chkIs.addEventListener('change', function(){ atualizarICMS0ePMVG(); atualizarBloqueioRepassePorIsento(); });
+
+  // Estado inicial do REPASSE (10,75% por padrão)
+  atualizarBloqueioRepassePorIsento();
+});
+</script>
+
+<script>
+// --- Gera o PDF do bloco de Resumo visível ---
+function gerarPDFResumo() {
+  const el = document.getElementById('resumoArea');
+  if (!el) { alert('Resumo não encontrado.'); return; }
+  // Gera diretamente do bloco visível
+  const opcoes = {
+    margin: [0.5, 0.5, 0.5, 0.5],
+    filename: 'RELATÓRIO DE MARGENS.pdf',
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff', scrollX: 0, scrollY: 0 },
+    jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+  };
+  html2pdf().set(opcoes).from(el).save();
+}
+
+// Esconde o botão PDF antigo, se existir, para evitar confusão
+window.addEventListener('load', () => {
+  const oldBtn = document.getElementById('btnGerarPDF');
+  if (oldBtn) oldBtn.style.display = 'none';
+  const resumoBtn = document.getElementById('btnGerarPDFResumo');
+  if (resumoBtn) resumoBtn.addEventListener('click', gerarPDFResumo);
+});
+</script>
+<button class="btn-flutuante" onclick="limparTudo()" 
+        title="Limpar Tudo" 
+        aria-label="Limpar todos os campos">
+    Limpar Tudo 🗑️
+</button>
+<footer>
+    <span>Elaborado por</span><strong>Vinicius</strong>
+</footer>
+</body>
+</html>
