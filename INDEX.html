@@ -1186,6 +1186,7 @@ function repetirValorPF() {
 }
 
 // Calcula o valor de venda baseado na margem direta informada
+// Calcula o valor de venda baseado na margem direta informada
 function calcularVendaPorMargem() {
     const custo = parseFloat(document.getElementById('custoProduto').value);
     const margemDireta = parseFloat(document.getElementById('margemDireta').value);
@@ -1218,16 +1219,25 @@ function calcularVendaPorMargem() {
     const temMaisDe2Casas = Math.abs(valorVenda - valorVendaArredondado) > 0.0001;
     
     if (temMaisDe2Casas && sugestaoDiv) {
-        // Calcula margem para valor com 2 casas decimais
-        // Testa arredondando para baixo e para cima
+        // Calcula valores com exatamente 2 casas decimais (arredondado para baixo e para cima)
         const vendaBaixo = Math.floor(valorVenda * 100) / 100;
         const vendaCima = Math.ceil(valorVenda * 100) / 100;
         
-        const margemBaixo = ((vendaBaixo - custo) / custo) * 100;
-        const margemCima = ((vendaCima - custo) / custo) * 100;
+        // Calcula a MARGEM EXATA que resulta nesses valores
+        // Fórmula reversa: Margem = ((Venda / Custo) - 1) × 100
+        const margemBaixo = ((vendaBaixo / custo) - 1) * 100;
+        const margemCima = ((vendaCima / custo) - 1) * 100;
         
-        // Mostra ambas as opções
-        sugestaoDiv.innerHTML = `💡 Sugestão para 2 casas: <strong>${margemBaixo.toFixed(2)}%</strong> (R$ ${vendaBaixo.toFixed(2)}) ou <strong>${margemCima.toFixed(2)}%</strong> (R$ ${vendaCima.toFixed(2)})`;
+        // Verifica qual das duas margens está mais próxima da margem digitada
+        const diffBaixo = Math.abs(margemBaixo - margemDireta);
+        const diffCima = Math.abs(margemCima - margemDireta);
+        
+        if (diffBaixo < diffCima) {
+            sugestaoDiv.innerHTML = `💡 Sugestão para 2 casas: <strong>${margemBaixo.toFixed(2)}%</strong> (R$ ${vendaBaixo.toFixed(2)}) ou <strong>${margemCima.toFixed(2)}%</strong> (R$ ${vendaCima.toFixed(2)})`;
+        } else {
+            sugestaoDiv.innerHTML = `💡 Sugestão para 2 casas: <strong>${margemCima.toFixed(2)}%</strong> (R$ ${vendaCima.toFixed(2)}) ou <strong>${margemBaixo.toFixed(2)}%</strong> (R$ ${vendaBaixo.toFixed(2)})`;
+        }
+        
         sugestaoDiv.style.display = 'block';
     } else {
         if (sugestaoDiv) sugestaoDiv.style.display = 'none';
