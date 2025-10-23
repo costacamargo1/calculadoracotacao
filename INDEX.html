@@ -553,14 +553,25 @@ footer strong::after {
             </div>
             </div>
             
-            <div class="form-group">
-                <label>VALOR DE VENDA (R$):</label>
-                <input type="number" id="valorVenda" step="0.0001" placeholder="Inserir valor de venda">
-                <div class="checkbox-option">
-                    <input type="checkbox" id="repetirPF" onchange="repetirValorPF()">
-                    <label for="repetirPF" style="margin: 0;">REPETIR PF</label>
-                </div>
+<div class="form-group">
+    <div class="pmvg-grid">
+        <div class="col">
+            <label>VALOR DE VENDA (R$):</label>
+            <input type="number" id="valorVenda" step="0.0001" placeholder="Inserir valor de venda">
+            <div class="checkbox-option">
+                <input type="checkbox" id="repetirPF" onchange="repetirValorPF()">
+                <label for="repetirPF" style="margin: 0;">REPETIR PF</label>
             </div>
+        </div>
+        <div class="col">
+            <label>MARGEM DIRETA (%):</label>
+            <input type="number" id="margemDireta" step="0.01" placeholder="Ex: 25 para 25% de margem" oninput="calcularVendaPorMargem()">
+            <div style="font-size: 12px; color: #666; margin-top: 4px;">
+                <em>• Calcula automaticamente o valor de venda</em>
+            </div>
+        </div>
+    </div>
+</div>
             
             <div class="form-group">
                 <label>VALOR ESTIMADO (R$):</label>
@@ -995,7 +1006,7 @@ function limparTudo() {
     }
         // Limpa com verificação
     const campos = ['produtoNome', 'basePF', 'valorICMS0', 'desconto', 'valorPMVG', 
-                    'custoProduto', 'valorPF', 'valorVenda', 'valorEstimado'];
+                    'custoProduto', 'valorPF', 'valorVenda', 'valorEstimado', 'margemDireta'];
     
     campos.forEach(id => {
         const el = document.getElementById(id);
@@ -1012,6 +1023,7 @@ function limparTudo() {
     document.getElementById('valorPF').value = '';
     document.getElementById('valorVenda').value = '';
     document.getElementById('valorEstimado').value = '';
+    document.getElementById('margemDireta').value = '';
     
     // Desmarca checkboxes
     document.getElementById('chkDesonerado').checked = false;
@@ -1153,14 +1165,45 @@ const elVE = document.getElementById('r_estimado');if (elVE) { const v = (docume
             }
         });
     </script>
+    
 <script>
 function repetirValorPF() {
     const checkbox = document.getElementById('repetirPF');
     const valorPF = document.getElementById('valorPF').value;
     if (checkbox && checkbox.checked && valorPF) {
         document.getElementById('valorVenda').value = valorPF;
+        // Limpa margem direta quando repetir PF
+        document.getElementById('margemDireta').value = '';
     }
 }
+
+// Calcula o valor de venda baseado na margem direta informada
+function calcularVendaPorMargem() {
+    const custo = parseFloat(document.getElementById('custoProduto').value);
+    const margemDireta = parseFloat(document.getElementById('margemDireta').value);
+    
+    // Se não tiver custo ou margem válida, não faz nada
+    if (isNaN(custo) || custo <= 0 || isNaN(margemDireta)) {
+        return;
+    }
+    
+    // Fórmula: Valor de Venda = Custo × (1 + Margem/100)
+    const valorVenda = custo * (1 + margemDireta / 100);
+    
+    // Atualiza o campo de valor de venda
+    document.getElementById('valorVenda').value = valorVenda.toFixed(4);
+    
+    // Desmarca "Repetir PF" se estiver marcado
+    document.getElementById('repetirPF').checked = false;
+}
+
+// Limpa a margem direta quando o usuário digitar manualmente no valor de venda
+document.getElementById('valorVenda').addEventListener('input', function() {
+    // Se o usuário digitou no campo de venda, limpa a margem direta
+    if (document.activeElement === this) {
+        document.getElementById('margemDireta').value = '';
+    }
+});
 
 // === ICMS 0% + ISENTO/DESONERADO + REPASSE BLOQUEADO ===
 function atualizarICMS0ePMVG() {
