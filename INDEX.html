@@ -41,7 +41,11 @@
         padding: 20px;
         min-height: 100vh;
 }
-        
+        .pmvg-grid{ display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+        @media (max-width:768px){ .pmvg-grid{ grid-template-columns:1fr; } }
+
+        .aviso-flag{ color:#ef4444; font-style:italic; font-weight:600; margin-top:6px; }
+
         .container {
             max-width: 900px;
             margin: 0 auto;
@@ -461,10 +465,21 @@ footer strong::after {
                 </div>
             </div>
 
-            <div class="form-group" id="campoPMVG" style="display: none;">
+            <div class="form-group" id="campoPMVG" style="display:none;">
+                <div class="pmvg-grid">
+                <div class="col">
                 <label>VALOR DE VENDA - PMVG (21,53%) - R$:</label>
                 <input type="number" id="valorPMVG" step="0.0001" placeholder="Calculado automaticamente ou inserido manualmente">
             </div>
+
+             <!-- NOVO CAMPO -->
+             <div class="col" id="campoPMVG0" style="display:none;">
+                <label>VALOR PMVG 0% — (ISENTO ou DESONERADO) - R$:</label>
+                <input type="number" id="valorPMVG0" step="0.0001" placeholder="Preenchido quando ISENTO/DESONERADO">
+                </div>
+            </div>
+         </div>
+
             
             <div class="form-group">
                 <label>DESCONTO (%):</label>
@@ -530,8 +545,12 @@ footer strong::after {
             </div>
             
             <div class="form-group">
-                <label>VALOR DO PF OU PMVG (R$):</label>
-                <input type="number" id="valorPF" step="0.0001" placeholder="Valor será importado automaticamente. Poderá ser inserido de forma manual.">
+             <label>VALOR DO PF OU PMVG (R$):</label>
+            <input type="number" id="valorPF" step="0.0001" placeholder="Valor será importado automaticamente. Poderá ser inserido de forma manual.">
+             <!-- AVISO quando usar PMVG 0% -->
+            <div id="avisoPF" class="aviso-flag" style="display:none;">
+             PRODUTO MARCADO COMO: ISENTO/DESONERADO — <em>ATENÇÃO NO CÁLCULO</em>
+            </div>
             </div>
             
             <div class="form-group">
@@ -760,47 +779,71 @@ requestAnimationFrame(() => {
 
 // Adiciona o "escutador de evento" ao botão que criamos
 document.getElementById('btnGerarPDF').addEventListener('click', gerarPDF);
+
+function atualizarAvisoPF(ativo, tipo){
+  const aviso = document.getElementById('avisoPF');
+  if(!aviso) return;
+  if(ativo){
+    aviso.style.display = 'block';
+    aviso.innerHTML = `PRODUTO MARCADO COMO: <strong>${tipo}</strong> — <em>ATENÇÃO NO CÁLCULO</em>`;
+  } else {
+    aviso.style.display = 'none';
+    aviso.textContent = '';
+  }
+}
         
 function calcularPMVG() {
-  const basePFEl = document.getElementById('basePF');
-  const basePF = parseFloat(basePFEl ? basePFEl.value : '');
-  const campoPMVG = document.getElementById('campoPMVG');
-
+  const basePF = parseFloat(document.getElementById('basePF')?.value || '');
   const des = document.getElementById('chkDesonerado')?.checked || false;
   const isento = document.getElementById('chkIsento')?.checked || false;
   const capAtivo = document.getElementById('capSim')?.checked || false;
 
-  if (!capAtivo) return;
-
-  if (campoPMVG) campoPMVG.style.display = 'block';
-  if (isNaN(basePF) || basePF <= 0) return;
-
-  // Atualiza o VALOR ICMS 0% apenas para exibição (0,83 x BASE PF)
+  const boxPMVG = document.getElementById('campoPMVG');
+  const boxPMVG0 = document.getElementById('campoPMVG0');
   const icms0El = document.getElementById('valorICMS0');
-  const valorICMS0 = +(basePF * 0.83).toFixed(4);
-  if (icms0El) icms0El.value = valorICMS0.toFixed(4);
 
-  let pmvg;
-
-  if (des) {
-    // ✅ DESONERADO: CAP em cima da BASE PF (ex.: 1,00 → 0,7847)
-    pmvg = basePF * (1 - 21.53 / 100);
-    document.getElementById('valorPMVG').value = pmvg.toFixed(4);
-  } else if (isento) {
-    // ISENTO (mantém lógica anterior): CAP sobre VALOR ICMS 0%
-    pmvg = valorICMS0 * (1 - 21.53 / 100);
-    document.getElementById('valorPMVG').value = pmvg.toFixed(4);
-  } else {
-    // Caso normal: CAP sobre BASE PF com truncamento de 4 casas
-    const bruto = basePF * (1 - 21.53 / 100);
-    const truncado = Math.trunc(bruto * 10000) / 10000;
-    document.getElementById('valorPMVG').value = truncado.toFixed(4);
+  if (!capAtivo) {
+    if (boxPMVG) boxPMVG.style.display = 'none';
+    const pmvgEl = document.getElementById('valorPMVG');
+    const pmvg0El = document.getElementById('valorPMVG0');
+    if (pmvgEl) pmvgEl.value = '';
+    if (pmvg0El) pmvg0El.value = '';
+    atualizarAvisoPF(false);
+    return;
   }
 
-  // Espelha o PMVG na Calculadora 2 quando CAP = SIM
-  const campoPF = document.getElementById('valorPF');
-  if (campoPF) {
-    campoPF.value = document.getElementById('valorPMVG').value;
+  if (isNaN(basePF) || basePF <= 0) return;
+
+  if (boxPMVG) boxPMVG.style.display = 'block';
+
+  // 1) PMVG (21,53%) SEMPRE sobre a BASE PF
+  const pmvgBase = Math.trunc((basePF * (1 - 21.53/100)) * 10000) / 10000;
+  document.getElementById('valorPMVG').value = pmvgBase.toFixed(4);
+
+  // 2) Quando ISENTO/DESONERADO, calcula ICMS 0% e o PMVG 0% (com CAP)
+  if (des || isento) {
+    const valorICMS0 = +(basePF * 0.83).toFixed(4);
+    if (icms0El) icms0El.value = valorICMS0.toFixed(4);
+
+    const pmvg0 = valorICMS0 * (1 - 21.53/100);
+    if (boxPMVG0) boxPMVG0.style.display = 'block';
+    const pmvg0El = document.getElementById('valorPMVG0');
+    if (pmvg0El) pmvg0El.value = pmvg0.toFixed(4);
+
+    // → Calculadora 2 passa a usar o PMVG 0%
+    document.getElementById('valorPF').value = pmvg0.toFixed(4);
+    atualizarAvisoPF(true, isento ? 'ISENTO' : 'DESONERADO');
+
+  } else {
+    // Sem isento/desonerado: zera ICMS0 e esconde PMVG 0%
+    if (icms0El) icms0El.value = '';
+    if (boxPMVG0) boxPMVG0.style.display = 'none';
+    const pmvg0El = document.getElementById('valorPMVG0');
+    if (pmvg0El) pmvg0El.value = '';
+
+    // → Calculadora 2 usa o PMVG sobre a base
+    document.getElementById('valorPF').value = pmvgBase.toFixed(4);
+    atualizarAvisoPF(false);
   }
 }
 
@@ -812,11 +855,20 @@ function calcularPMVG() {
         }
         
         // Recalcular PMVG quando base PF ou desconto mudarem
-        document.getElementById('basePF').addEventListener('input', function() {
-            if (document.getElementById('capSim').checked) {
-                calcularPMVG();
-            }
-        });
+document.getElementById('basePF').addEventListener('input', function () {
+  const raw = this.value;
+  const v = parseFloat(raw);
+
+  if (!raw || isNaN(v) || v <= 0) {
+    zerarCalculosPorBase();
+    return;
+  }
+
+  // Se CAP = SIM, recalcula normalmente
+  if (document.getElementById('capSim').checked) {
+    calcularPMVG();
+  }
+});
 
         // Mantém PF/PMVG sincronizados ao editar o PMVG manualmente, quando CAP = SIM
         document.getElementById('valorPMVG').addEventListener('input', function(){
@@ -865,18 +917,13 @@ function calcularPMVG() {
     }
     
     // LÓGICA AJUSTADA: Define qual será a base para o cálculo
-    let baseCalculo;
-    
-    if (isento && temICMS0) {
-        // Se ISENTO e tem VALOR ICMS 0%, usa ele como base
-        baseCalculo = valorICMS0;
-    } else if (temBasePF) {
-        // Se tem BASE PF, usa ela
-        baseCalculo = basePF;
-    } else {
-        alert('Por favor, preencha a Base de Cálculo PF ou o VALOR ICMS 0%.');
-        return;
-    }
+// Para VALOR DE CUSTO: a base é SEMPRE a BASE PF
+if (!temBasePF) {
+  alert('Por favor, preencha a Base de Cálculo PF.');
+  return;
+}
+let baseCalculo = basePF;
+
     
     let valorAtual = baseCalculo;
     
@@ -985,6 +1032,9 @@ function limparTudo() {
     document.getElementById('resultadoMargens').style.display = 'none';
     document.getElementById('resumoArea').style.display = 'none';
     document.getElementById('campoPMVG').style.display = 'none';
+
+    // BASE PF
+     zerarCalculosPorBase();
     
     // Foca no primeiro campo
     document.getElementById('produtoNome').focus();
@@ -1114,36 +1164,8 @@ function repetirValorPF() {
 }
 // === ICMS 0% + ISENTO/DESONERADO + REPASSE BLOQUEADO ===
 function atualizarICMS0ePMVG() {
-  var base = parseFloat(document.getElementById('basePF').value);
-  var des = document.getElementById('chkDesonerado')?.checked || false;
-  var isento = document.getElementById('chkIsento')?.checked || false;
-  var campo = document.getElementById('valorICMS0');
-  if (!campo) return;
-  
-  // ✅ SEMPRE atualiza ICMS 0% se DESONERADO ou ISENTO estiver marcado
-  if ((des || isento) && !isNaN(base) && base > 0) {
-    var v = base * 0.83;
-    campo.value = v.toFixed(4);
-    
-    // Só calcula PMVG se CAP = SIM
-    if (document.getElementById('capSim') && document.getElementById('capSim').checked) {
-      // Deduz -21,53% de VALOR ICMS 0% para PMVG
-      var pmvg = v * (1 - 21.53/100);
-      var pmvgEl = document.getElementById('valorPMVG');
-      var pmvgBox = document.getElementById('campoPMVG');
-      if (pmvgBox) pmvgBox.style.display = 'block';
-      if (pmvgEl) pmvgEl.value = pmvg.toFixed(4);
-      // Espelhar no campo PF/PMVG da Calculadora 2 (se existir)
-      var campoPF = document.getElementById('valorPF');
-      if (campoPF) campoPF.value = pmvg.toFixed(4);
-      // Exibir item de margem PMVG x Custo quando houver
-      var itemPMVGCusto = document.getElementById('itemPMVGCusto');
-      if (itemPMVGCusto) itemPMVGCusto.style.display = 'flex';
-    }
-  } else {
-    // Limpa o campo se nenhum checkbox estiver marcado ou se não houver base
-    campo.value = '';
-  }
+  calcularPMVG();
+  atualizarBloqueioRepassePorIsento();
 }
 
 function atualizarBloqueioRepassePorIsento() {
@@ -1153,6 +1175,29 @@ function atualizarBloqueioRepassePorIsento() {
   var rNaoSei = document.getElementById('repasseNaoSei');
   var rIsento = document.getElementById('repasseIsento');
   if (!(r1075 && r1354 && rNaoSei && rIsento)) return;
+
+  function zerarCalculosPorBase() {
+  // Zera inputs calculados
+  ['valorICMS0','valorPMVG','valorPMVG0','custoProduto','valorPF']
+    .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+
+  // Zera textos de resultados
+  const setTxt = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+  setTxt('valorCusto', 'R$ 0,0000');
+  setTxt('margemBaseCusto', '0,00%');
+  setTxt('margemPMVGCusto', '0,00%');
+  setTxt('margemVendaCusto', '0,00%');
+  setTxt('margemEstimadoCusto', '0,00%');
+  setTxt('margemVendaEstimado', '0,00%');
+
+  // Esconde áreas/itens
+  ['campoPMVG','campoPMVG0','itemPMVGCusto','resultadoCusto','resultadoMargens','resumoArea']
+    .forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
+
+  // Some com o aviso da calculadora 2
+  if (typeof atualizarAvisoPF === 'function') atualizarAvisoPF(false);
+}
+
 
   if (isento) {
     // Marca automaticamente "SEM REPASSE - ISENTO" e bloqueia todas as opções
