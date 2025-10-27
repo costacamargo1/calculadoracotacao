@@ -59,18 +59,25 @@
             box-shadow: 0 10px 40px rgba(0,0,0,0.2);
         }
         
-        h1 {
-            color: #323336;
-            margin-bottom: 10px;
-            font-size: 19px;
+        h1 { /* Titulo Principal */
+         color: #171717;
+         margin-bottom: 0;             /* ✅ Remove margem inferior */
+         font-size: 18px;
+         font-weight: 700;
+         letter-spacing: -0.02em;
+         line-height: 40px;            /* ✅ Mesma altura do input (40px) */
         }
         
         h2 {
-            color: #323336;
-            margin-bottom: 20px;
-            font-size: 15px;
-            border-bottom: 2px solid #2b2929;
-            padding-bottom: 10px;
+         color: #171717;
+         margin-top: 40;
+         margin-bottom: 24px;
+         font-size: 15px;
+         font-weight: 600;
+         border-bottom: 2px solid #171717;
+         padding-bottom: 12px;
+         letter-spacing: -0.01em;
+         text-align: center; /* Centralizado */
         }
         
         .form-group {
@@ -404,25 +411,52 @@ footer strong::after {
 }
 </style>
 <style>
-  .topbar { display:flex; align-items:center; justify-content:space-between; gap:16px; }
-  .produto-field { display:flex; align-items:center; gap:8px; }
-  .produto-field label{
-  font-weight:600;
-  color:#323336;
-  white-space:nowrap;
-  margin:0;
-  line-height:1;            /* evita deslocamento vertical */
-  display:flex;             /* garante centragem perfeita */
-  align-items:center;
+.topbar { 
+    display: flex; 
+    align-items: flex-end;        /* ✅ ALINHA pela BASE (linha inferior) */
+    justify-content: space-between; 
+    gap: 24px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    padding-bottom: 16px;         /* ✅ Espaço antes do H2 */
+    border-bottom: 1px solid #E5E5E5;  /* ✅ OPCIONAL: linha separadora */
 }
-  .produto-field input{
-  height:35px;              /* altura consistente */
-  padding:0 10px;           /* com height fixa, zere o padding vertical */
-  border:1px solid #000;
-  border-radius:6px;
-  min-width:260px;
-  appearance:none;
-  -webkit-appearance:none;  /* Safari */
+.produto-field { 
+    display: flex; 
+    align-items: center; 
+    gap: 12px;                    /* ✅ Espaço entre label e input */
+    min-width: 200px;             /* ✅ Largura mínima */
+}
+  .produto-field label{
+    font-weight: 500;
+    color: #171717;
+    white-space: nowrap;
+    margin: 0;
+    line-height: 40px;            /* ✅ Mesma altura do input */
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+}
+  .produto-field input {
+  height: 35px;
+  padding: 0 10px;
+  border: 1px solid #c7c7c7;
+  border-radius: 6px;
+  min-width: 260px;
+  background: #fff;
+  appearance: textfield;        /* ✅ Mantém aparência base sem quebrar bordas */
+  -webkit-appearance: textfield; /* ✅ Safari */
+}
+#produtoNome::placeholder {
+    font-size: 13px;
+    color: #A3A3A3; /* opcional: deixar mais claro */
+    font-style: italic;
+    opacity: 0.7; /* opcional: deixar mais claro */
+}
+.produto-field input:focus {
+    outline: none;
+    border-color: #171717;
+    box-shadow: 0 0 0 3px rgba(23,23,23,0.08);
 }
 
 
@@ -433,8 +467,8 @@ footer strong::after {
     <div class="container">
         <!-- CALCULADORA 1: CÁLCULO DO CUSTO -->
         <div class="calculator">
-        <div class="topbar"><h1>📊 Calculadora de Custo e Margens - MEDICAMENTOS</h1><div class="produto-field"><label for="produtoNome">PRODUTO:</label><input type="text" id="produtoNome" placeholder="Ex.: MESALAZINA 1G SUPOSITÓRIO"></div></div>
-            <h2>1️⃣ CÁLCULO DE CUSTO DO PRODUTO</h2>
+        <div class="topbar"><h1>• Calculadora de Custo e Margens - MEDICAMENTOS</h1><div class="produto-field"><label for="produtoNome">PRODUTO:</label><input type="text" id="produtoNome" placeholder="Ex.: Mesalazina 1g Supositório"></div></div>
+            <h2>CÁLCULO DE CUSTO DO PRODUTO</h2>
             
             <div class="form-group two-col">
   <div class="col">
@@ -537,7 +571,7 @@ footer strong::after {
         
         <!-- CALCULADORA 2: MARGENS E DEFASAGENS -->
         <div class="calculator">
-            <h2>2️⃣ CÁLCULO DE MARGENS E DEFASAGENS</h2>
+            <h2>CÁLCULO DE MARGENS E DEFASAGENS</h2>
             
             <div class="form-group">
                 <label>VALOR DE CUSTO (R$):</label>
