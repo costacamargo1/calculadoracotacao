@@ -106,7 +106,7 @@
             outline: none;
             border-color: #575757;
         }
-        
+                
         .radio-group {
             display: flex;
             gap: 20px;
@@ -152,11 +152,23 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 12px;
-            padding: 10px;
-            background: rgba(255,255,255,0.1);
-            border-radius: 5px;
+            margin-bottom: 14px;
+            padding: 12px 16px;
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.2s ease;
+            gap: 12px;
+            flex-wrap: wrap;
         }
+
+        .result-item:hover {
+    background: rgba(255, 255, 255, 0.12);
+    transform: translateX(4px);
+}
+
+
         
         .result-item:last-child {
             margin-bottom: 0;
@@ -164,24 +176,37 @@
         
         .result-label {
             font-weight: 600;
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.95);
+            flex: 1;
+            min-width: 200px;
         }
         
-        .result-value {
-            font-size: 18px;
-            font-weight: bold;
-        }
+.result-value {
+    font-size: 19px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    text-align: right;
+    flex-shrink: 0;
+    transition: transform 0.3s ease;
+}
         
-        .positive {
-            color: #4ade80;
+        /* Mantém as cores originais */
+        .result-value.positive {
+            color: #10b981;
+            text-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
         }
-        
-        .negative {
-            color: #f87171;
+
+        .result-value.negative {
+            color: #ef4444;
+            text-shadow: 0 0 10px rgba(239, 68, 68, 0.4);
         }
-        
-        .warning {
-            color: #fbbf24;
+
+        .result-value.warning {
+            color: #f59e0b;
+            text-shadow: 0 0 10px rgba(245, 158, 11, 0.4);
         }
+
         
         button {
             background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
@@ -280,6 +305,197 @@
         grid-template-columns: 1fr;
     }
 }
+
+/* Botões de Repasse Estilosos com Glass Effect */
+.radio-group-buttons {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.radio-button {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 14px;
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255, 255, 255, 0.15);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-height: 44px;
+    }
+
+.radio-button label {
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 13.5px;
+    text-align: center;
+    margin: 0 !important;
+    color: #171717;
+    line-height: 1.4;
+    pointer-events: none;
+    position: relative;
+    z-index: 0;
+}
+
+.radio-button:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.radio-button input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    margin: 0;
+    cursor: pointer;
+    z-index: 1;
+}
+
+
+
+/* Estado Checked - Botão Selecionado */
+.radio-button input[type="radio"]:checked ~ label {
+    color: #ffffff;
+}
+
+.radio-button:has(input[type="radio"]:checked) {
+    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+    border-color: rgba(255, 255, 255, 0.2);
+    box-shadow: 
+        0 4px 16px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    transform: translateY(-2px);
+}
+
+.radio-button:has(input[type="radio"]:checked):hover {
+    background: linear-gradient(135deg, #2d2d2d 0%, #1a1a1a 100%);
+    box-shadow: 
+        0 6px 20px rgba(0, 0, 0, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+/* Botão Disabled - MESMO VISUAL QUE OS OUTROS */
+.radio-button:has(input[type="radio"]:disabled) {
+    opacity: 1;
+    cursor: not-allowed;
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255, 255, 255, 0.15);
+}
+
+.radio-button:has(input[type="radio"]:disabled):hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.radio-button:has(input[type="radio"]:disabled) label {
+    cursor: not-allowed;
+    color: #171717;
+    opacity: 1;
+}
+
+.radio-button:has(input[type="radio"]:disabled) input[type="radio"] {
+    cursor: not-allowed;
+}
+
+/* Quando ISENTO está marcado (checked + disabled) */
+.radio-button:has(input[type="radio"]:disabled:checked) {
+    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+    border-color: rgba(255, 255, 255, 0.2);
+    box-shadow: 
+        0 4px 16px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    transform: translateY(-2px);
+}
+
+.radio-button:has(input[type="radio"]:disabled:checked) label {
+    color: #ffffff;
+}
+
+/* Ícone/Badge de Check */
+.radio-button input[type="radio"]:checked ~ label::before {
+    content: "✓";
+    display: inline-block;
+    margin-right: 6px;
+    font-weight: bold;
+    animation: checkPop 0.3s ease;
+}
+
+@keyframes checkPop {
+    0% { transform: scale(0); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+    .radio-group-buttons {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Responsivo Mobile */
+@media (max-width: 768px) {
+    .result-item {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 14px;
+        gap: 8px;
+    }
+    
+    .result-label {
+        font-size: 13px;
+        min-width: 100%;
+        margin-bottom: 4px;
+    }
+    
+    .result-value {
+        font-size: 22px;
+        text-align: left;
+        width: 100%;
+    }
+}
+
+/* Tablets */
+@media (max-width: 1024px) and (min-width: 769px) {
+    .result-label {
+        font-size: 13px;
+        min-width: 180px;
+    }
+    
+    .result-value {
+        font-size: 17px;
+    }
+}
+
+/* Telas muito pequenas */
+@media (max-width: 480px) {
+    .result-item {
+        padding: 12px;
+    }
+    
+    .result-label {
+        font-size: 12px;
+        line-height: 1.4;
+    }
+    
+    .result-value {
+        font-size: 20px;
+    }
+}
+
 </style>
 
     <style>
@@ -295,15 +511,16 @@
         #relatorio-pdf .destaque-negativo { color: #dc3545; font-weight: bold; }
     </style>
 <style>
-  /* Resumo visível para geração do PDF */
-  #resumoArea { 
-    background: #ffffff;
-    border: 1px solid #000000;
-    border-radius: 10px;
-    padding: 16px;
-    margin-top: 16px;
-    color: #000 !important; /* Força a cor preta */
-  }
+    /* Resumo visível para geração do PDF */
+    #resumoArea { 
+    background: #FFFFFF;
+    border: 1.5px solid #D4D4D4;
+    border-radius: 0;
+    padding: 24px;
+    margin-top: 20px;
+    color: #000 !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
   #resumoArea h3 {
     margin-bottom: 10px;
     text-align: center;
@@ -314,53 +531,54 @@
     border: none;
     background: transparent !important;
 }
-  #resumoArea table { width: 100%; border-collapse: collapse; }
-  #resumoArea td { border: 1px solid #000000; padding: 8px; }
-  #resumoArea td.label { font-weight: 600; }
-  #resumoArea td.valor { text-align: right; }
-  #btnGerarPDFResumo { margin-top: 12px; padding: 8px 12px; }
+#resumoArea table { width: 100%; border-collapse: collapse; }
+#resumoArea td { border: 1px solid #646464; padding: 12px 16px; font-size: 14px; }
+#resumoArea td.label { font-weight: 600; color: #171717; }
+#resumoArea td.valor { text-align: right; color: #404040; }
+#btnGerarPDFResumo { margin-top: 12px; padding: 8px 12px; }
 
-footer {
-    text-align: center;
-    padding: 30px;
-    margin-top: 50px;
-    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
-      border-radius: 16px;
-  overflow: hidden;
-}
 
-footer span {
-    color: #9ca3af;
-    font-size: 13px;
-    font-weight: 400;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
-    font-family: 'Inter', 'Segoe UI', sans-serif;
-    
-}
+    footer {
+        text-align: center;
+        padding: 30px;
+        margin-top: 50px;
+        background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
+        border-radius: 16px;
+    overflow: hidden;
+    }
 
-footer strong {
-    color: #f5f5f5;
-    font-size: 13px;
-    font-weight: 600;
-    margin-left: 5px;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
-    font-family: 'Inter', 'Segoe UI', sans-serif;
-    position: relative;
-}
+    footer span {
+        color: #9ca3af;
+        font-size: 13px;
+        font-weight: 400;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        font-family: 'Inter', 'Segoe UI', sans-serif;
+        
+    }
 
-footer strong::after {
-    content: '';
-    position: absolute;
-    bottom: -2px;
-    left: 0;
-    width: 100%;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, #667eea, transparent);
-}
+    footer strong {
+        color: #f5f5f5;
+        font-size: 13px;
+        font-weight: 600;
+        margin-left: 5px;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        font-family: 'Inter', 'Segoe UI', sans-serif;
+        position: relative;
+    }
+
+    footer strong::after {
+        content: '';
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        width: 100%;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, #667eea, transparent);
+    }
 
 
 /* Botão flutuante fixo */
@@ -474,19 +692,19 @@ footer strong::after {
             <h2>CÁLCULO DE CUSTO DO PRODUTO</h2>
             
             <div class="form-group two-col">
-  <div class="col">
-    <label>BASE DE CÁLCULO PF (R$):<br><em>• Para base, considerar ICMS 17% - ES</em></label>
-    <input type="number" id="basePF" step="0.0001" placeholder="Inserir PF 17%">
-    <div class="checks">
-      <label class="check"><input type="checkbox" id="chkDesonerado"> DESONERADO (87/02)</label>
-      <label class="check"><input type="checkbox" id="chkIsento"> ISENTO (162/94 OU 140/01)</label>
+    <div class="col">
+            <label>BASE DE CÁLCULO PF (R$):<br><em>• Para base, considerar ICMS 17% - ES</em></label>
+            <input type="number" id="basePF" step="0.0001" placeholder="Inserir PF 17%">
+            <div class="checks">
+            <label class="check"><input type="checkbox" id="chkDesonerado"> DESONERADO (87/02)</label>
+            <label class="check"><input type="checkbox" id="chkIsento"> ISENTO (162/94 OU 140/01)</label>
+         </div>
     </div>
-  </div>
-  <div class="col">
-    <label>VALOR ICMS 0% (R$):</label>
-    <input type="number" id="valorICMS0" step="0.0001" placeholder="Valor da base com ICMS 0%">
-  </div>
-</div>
+    <div class="col">
+            <label>VALOR ICMS 0% (R$):</label>
+            <input type="number" id="valorICMS0" step="0.0001" placeholder="Valor da base com ICMS 0%">
+        </div>
+    </div>
 
            <div class="form-group">
                 <label>CAP 21,53%:</label>
@@ -525,29 +743,30 @@ footer strong::after {
  
             
             <div class="form-group">
-                <label>REPASSE:<br> <em>• Produto nacional: 10,75% - Produto Importado: 13,54%</em></label>
-                <div class="radio-group">
-                    <div class="radio-option">
-                        <input type="radio" id="repasse1075" name="repasse" value="10.75" checked>
-                        <label for="repasse1075" style="margin: 0;">10,75%</label>
-                    </div>
-                    <div class="radio-option">
-                        <input type="radio" id="repasse1354" name="repasse" value="13.54">
-                        <label for="repasse1354" style="margin: 0;">13,54%</label>
-                    </div>
-                    <div class="radio-option">
-                        <input type="radio" id="repasseNaoSei" name="repasse" value="0">
-                        <label for="repasseNaoSei" style="margin: 0;">SEM INFORMAÇÃO</label>
-                    </div>
-                    <div class="radio-option" title="Marcado automaticamente quando [X] ISENTO">
-                        <input type="radio" id="repasseIsento" name="repasse" value="0" disabled>
-                        <label for="repasseIsento" style="margin: 0;">SEM REPASSE - ISENTO</label>
-                    </div>
+               <label>REPASSE:<br> <em>• Produto nacional: 10,75% - Produto Importado: 13,54%</em></label>
+            <div class="radio-group-buttons">
+                <div class="radio-button">
+                    <input type="radio" id="repasse1075" name="repasse" value="10.75" checked>
+                    <label for="repasse1075">10,75%<br><small style="font-size:11px;">Nacional</small></label>
                 </div>
-                <div style="text-align: center;">
+            <div class="radio-button">
+                    <input type="radio" id="repasse1354" name="repasse" value="13.54">
+                    <label for="repasse1354">13,54%<br><small style="font-size:11px; opacity:0.8;">Importado</small></label>
+                </div>
+                    <div class="radio-button">
+            <input type="radio" id="repasseNaoSei" name="repasse" value="0">
+            <label for="repasseNaoSei">SEM<br>INFORMAÇÃO</label>
+        </div>
+        <div class="radio-button" title="Marcado automaticamente quando [X] ISENTO">
+            <input type="radio" id="repasseIsento" name="repasse" value="0" disabled>
+            <label for="repasseIsento">SEM REPASSE<br><small style="font-size:11px; opacity:0.8;">Isento</small></label>
+        </div>
+    </div>
+    <div style="text-align: center;">
 <button onclick="calcularCusto()" style="margin: 30px 0 -30px 0;">CALCULAR CUSTO</button>
                 </div>
-            </div></div>
+            </div>
+        </div>
             
             
             
@@ -919,6 +1138,9 @@ document.getElementById('basePF').addEventListener('input', function () {
   if (document.getElementById('capSim').checked) {
     calcularPMVG();
   }
+  
+  // ← NOVO: Recalcula ICMS 0% se ISENTO/DESONERADO estiver marcado
+  calcularICMS0SemCAP();
 });
 
         // Mantém PF/PMVG sincronizados ao editar o PMVG manualmente, quando CAP = SIM
@@ -1414,6 +1636,7 @@ window.addEventListener('load', function () {
       target.checked = false;   // desmarca o outro
     }
     atualizarICMS0ePMVG();      // recalcula e aplica bloqueios (repasse p/ ISENTO)
+    calcularICMS0SemCAP();      // ← NOVA FUNÇÃO: calcula ICMS 0% mesmo sem CAP
     if (typeof atualizarAvisoPorChecks === 'function') atualizarAvisoPorChecks();
   }
 
@@ -1426,6 +1649,7 @@ window.addEventListener('load', function () {
   // Estado inicial do REPASSE conforme ISENTO
   atualizarBloqueioRepassePorIsento();
 });
+
 </script>
 <script>
 // --- Gera o PDF do bloco de Resumo visível ---
@@ -1441,6 +1665,45 @@ function gerarPDFResumo() {
     jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
   };
   html2pdf().set(opcoes).from(el).save();
+}
+
+// === NOVA FUNÇÃO: Calcula ICMS 0% quando ISENTO/DESONERADO, independente do CAP ===
+function calcularICMS0SemCAP() {
+  const basePF = parseFloat(document.getElementById('basePF')?.value || '');
+  const des = document.getElementById('chkDesonerado')?.checked || false;
+  const isento = document.getElementById('chkIsento')?.checked || false;
+  const icms0El = document.getElementById('valorICMS0');
+  const capAtivo = document.getElementById('capSim')?.checked || false;
+  
+  // Se não tem base PF válida, não faz nada
+  if (isNaN(basePF) || basePF <= 0) {
+    if (icms0El) icms0El.value = '';
+    return;
+  }
+  
+  // Se ISENTO ou DESONERADO está marcado, calcula ICMS 0%
+  if (des || isento) {
+    const valorICMS0 = +(basePF * 0.83).toFixed(4);
+    if (icms0El) icms0El.value = valorICMS0.toFixed(4);
+    
+    // Se CAP NÃO está ativo, atualiza o campo "Valor do PF ou PMVG" 
+    // da calculadora 2 com o ICMS 0%
+    if (!capAtivo) {
+      const valorPFEl = document.getElementById('valorPF');
+      if (valorPFEl) valorPFEl.value = valorICMS0.toFixed(4);
+      atualizarAvisoPF(true, isento ? 'ISENTO' : 'DESONERADO');
+    }
+  } else {
+    // Se desmarcou ISENTO/DESONERADO, limpa ICMS 0%
+    if (icms0El) icms0El.value = '';
+    
+    // Se CAP NÃO está ativo, volta o PF normal
+    if (!capAtivo) {
+      const valorPFEl = document.getElementById('valorPF');
+      if (valorPFEl) valorPFEl.value = basePF.toFixed(4);
+      atualizarAvisoPF(false);
+    }
+  }
 }
 
 // Esconde o botão PDF antigo, se existir, para evitar confusão
