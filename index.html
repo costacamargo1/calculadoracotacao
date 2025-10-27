@@ -1174,14 +1174,23 @@ if (avisoMargemEstimado) {
     let mensagem = '';
     let classeCSS = 'result-value';
     
-    if (Math.abs(venda - estimado) < 0.01) {
-        // Valores praticamente iguais (tolerância de R$ 0,01)
-        mensagem = ` (EXATAMENTE NO ESTIMADO)`;
+    const diferencaPercentual = Math.abs(margemVEPercent);
+    
+    if (diferencaPercentual < 0.1) {
+        // Diferença menor que 0.0% = praticamente igual
+        mensagem = ` (VALOR ESTIMADO OK)`;
         classeCSS = 'result-value positive';
     } else if (venda > estimado) {
-        // Venda maior que estimado = DEFASADO (preço acima do mercado)
-        mensagem = ` (DEFASADO)`;
-        classeCSS = 'result-value negative';
+        // Venda maior que estimado = DEFASADO
+        if (diferencaPercentual <= 1) {
+            // Diferença pequena (até 1%)
+            mensagem = ` (LEVEMENTE DEFASADO)`;
+            classeCSS = 'result-value warning';
+        } else {
+            // Diferença significativa (acima de 2%)
+            mensagem = ` (DEFASADO)`;
+            classeCSS = 'result-value negative';
+        }
     } else {
         // Venda menor que estimado = ABAIXO DO ESTIMADO (preço competitivo)
         mensagem = ` (ABAIXO DO ESTIMADO)`;
