@@ -45,6 +45,7 @@
         @media (max-width:768px){ .pmvg-grid{ grid-template-columns:1fr; } }
 
         .aviso-flag{ color:#ef4444; font-style:italic; font-weight:600; margin-top:6px; }
+        .aviso-flag-positivo{ color:#10b981; font-style:italic; font-weight:600; margin-top:6px; }
 
         .container {
             max-width: 900px;
@@ -103,7 +104,7 @@
         
         input[type="number"]:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: #575757;
         }
         
         .radio-group {
@@ -632,6 +633,8 @@ footer strong::after {
                     <span class="result-label">DIFERENÇA PERCENTUAL → VALOR DE VENDA X ESTIMADO:</span>
                     <span class="result-value" id="margemVendaEstimado">0,00%</span>
                 </div>
+                <div id="avisoMargemEstimado" class="aviso-flag" style="display:none; color:#10b981;">
+                </div>
 <div id="resumoArea" style="display:none;">
   <h3>RELATÓRIO DE CUSTO DO PRODUTO</h3>
   <table>
@@ -1126,6 +1129,23 @@ function calcularMargens() {
             elemento.className = 'result-value positive';
         }
     };
+    // Verifica se conseguimos atender o estimado com margem >= 25%
+const avisoMargemEstimado = document.getElementById('avisoMargemEstimado');
+if (avisoMargemEstimado) {
+    if (!isNaN(custo) && custo > 0 && !isNaN(estimado) && estimado > 0) {
+        const margemCustoEstimado = ((estimado - custo) / custo) * 100;
+        
+        if (margemCustoEstimado >= 25) {
+            avisoMargemEstimado.innerHTML = `✅ <strong>CONSEGUIMOS ATENDER O VALOR ESTIMADO</strong> com <strong>${margemCustoEstimado.toFixed(2)}%</strong> de margem.`;
+            avisoMargemEstimado.style.display = 'block';
+            avisoMargemEstimado.style.color = '#10b981';
+        } else {
+            avisoMargemEstimado.style.display = 'none';
+        }
+    } else {
+        avisoMargemEstimado.style.display = 'none';
+    }
+}
 
     // VERIFICAÇÃO PRINCIPAL: O custo deve ser um número válido e maior que zero.
     if (isNaN(custo) || custo <= 0) {
@@ -1146,12 +1166,31 @@ function calcularMargens() {
 }
 
     // A diferença Venda x Estimado não depende do custo, pode ser calculada separadamente
-    if (isNaN(estimado) || estimado === 0) {
-        atualizarMargem(elementoVE, NaN);
+    if (isNaN(estimado) || estimado === 0 || isNaN(venda) || venda === 0) {
+    elementoVE.textContent = 'N/A';
+    elementoVE.className = 'result-value';
     } else {
-        const margemVEPercent = ((venda - estimado) / estimado) * 100;
-        atualizarMargem(elementoVE, margemVEPercent);
+    const margemVEPercent = ((venda - estimado) / estimado) * 100;
+    let mensagem = '';
+    let classeCSS = 'result-value';
+    
+    if (Math.abs(venda - estimado) < 0.01) {
+        // Valores praticamente iguais (tolerância de R$ 0,01)
+        mensagem = ` (EXATAMENTE NO ESTIMADO)`;
+        classeCSS = 'result-value positive';
+    } else if (venda > estimado) {
+        // Venda maior que estimado = DEFASADO (preço acima do mercado)
+        mensagem = ` (DEFASADO)`;
+        classeCSS = 'result-value negative';
+    } else {
+        // Venda menor que estimado = ABAIXO DO ESTIMADO (preço competitivo)
+        mensagem = ` (ABAIXO DO ESTIMADO)`;
+        classeCSS = 'result-value positive';
     }
+    
+    elementoVE.textContent = `${margemVEPercent.toFixed(2)}%${mensagem}`;
+    elementoVE.className = classeCSS;
+}
     
     // Garante que a caixa de resultados SEMPRE apareça
     
