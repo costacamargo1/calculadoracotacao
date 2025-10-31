@@ -201,14 +201,14 @@
             min-width: 200px;
         }
         
-.result-value {
-    font-size: 19px;
-    font-weight: 700;
-    letter-spacing: -0.02em;
-    text-align: right;
-    flex-shrink: 0;
-    transition: transform 0.3s ease;
-}
+        .result-value {
+            font-size: 19px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            text-align: right;
+            flex-shrink: 0;
+            transition: transform 0.3s ease;
+        }
         
         /* Mantém as cores originais */
         .result-value.positive {
@@ -552,6 +552,69 @@
 #resumoArea td.valor { text-align: right; color: #404040; }
 #btnGerarPDFResumo { margin-top: 12px; padding: 8px 12px; }
 
+/* ===== AVISO DESTACADO ===== */
+.aviso-destaque {
+    color: #ffffff;
+    font-size: 13px;
+    margin-top: 12px;
+    padding: 14px 20px;
+    padding-left: 45px;
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    border: none;
+    border-radius: 10px;
+    font-style: italic;
+    font-weight: 600;
+    position: relative;
+    box-shadow: 0 4px 12px rgba(197, 69, 69, 0.3);
+}
+
+.aviso-destaque::before {
+    content: "⚠";
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 20px;
+    font-style: normal;
+}
+
+.aviso-destaque strong {
+    font-weight: 800;
+    color: #ffffff;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.aviso-destaque em {
+    font-style: italic;
+    font-weight: 600;
+    color: #fef2f2;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: 768px) {
+    .aviso-destaque {
+        font-size: 12px;
+        padding: 10px 14px;
+        margin-top: 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .aviso-destaque {
+        font-size: 11px;
+        padding: 8px 12px;
+    }
+}
 
     footer {
         text-align: center;
@@ -828,11 +891,11 @@
             <div class="form-group">
              <label>VALOR DO PF OU PMVG (R$):</label>
             <input type="number" id="valorPF" step="0.0001" placeholder="Valor será importado automaticamente. Poderá ser inserido de forma manual.">
-             <!-- AVISO quando usar PMVG 0% -->
-            <div id="avisoPF" class="aviso-flag" style="display:none;">
-             PRODUTO MARCADO COMO: ISENTO/DESONERADO — <em>ATENÇÃO NO CÁLCULO</em>
-            </div>
-            </div>
+        <!-- Aviso Destacado -->
+        <div id="avisoPF" class="aviso-destaque" style="display:none;">
+            PRODUTO MARCADO COMO: <strong id="avisoTipoPF"></strong> — <em>ATENÇÃO NO CÁLCULO</em>
+        </div>
+    </div>
             
 <div class="form-group">
     <div class="pmvg-grid">
@@ -992,6 +1055,21 @@
 </div>
 
     <script>
+
+function atualizarAvisoPF(ativo, tipo) {
+    const aviso = document.getElementById('avisoPF');
+    const avisoTipo = document.getElementById('avisoTipoPF');
+    
+    if (!aviso || !avisoTipo) return;
+    
+    if (ativo) {
+        aviso.style.display = 'block';
+        avisoTipo.textContent = tipo;  // "DESONERADO" ou "ISENTO"
+    } else {
+        aviso.style.display = 'none';
+        avisoTipo.textContent = '';
+    }
+}        
 
 // Função para gerar o PDF formatado como um relatório
 function gerarPDF() {
