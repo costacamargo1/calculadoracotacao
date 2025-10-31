@@ -681,54 +681,87 @@
     }
 
 
-/* Botão flutuante fixo */
+/* ===== BOTÃO FLUTUANTE - GLASS EFFECT ESCURO ===== */
 .btn-flutuante {
     position: fixed;
-    bottom: 30px;
-    right: 30px;
-    width: auto;
-    min-width: 80px;
-    height: 50px;
-    padding: 0 20px;
-    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-    color: white;
-    border: none;
-    border-radius: 25px;
-    font-size: 16px;
+    bottom: 32px;
+    right: 32px;
+    min-width: 130px;
+    height: 56px;
+    padding: 0 28px;
+    
+    /* Glass Effect */
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(20px) brightness(1.1);
+    -webkit-backdrop-filter: blur(20px) brightness(1.1);
+    
+    /* Borda e Sombras */
+     border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 
+        0 8px 32px rgba(31, 38, 135, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+
+    /* Texto */
+    color: #ffffff;
+    font-size: 15px;
     font-weight: 600;
+    letter-spacing: 0.5px;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    
+    border-radius: 16px;
     cursor: pointer;
-    box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
-    transition: all 0.3s;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     z-index: 1000;
 }
 
 .btn-flutuante:hover {
-    transform: translateY(-5px) scale(1.1);
-    box-shadow: 0 6px 20px rgba(239, 68, 68, 0.6);
+    background: rgb(255, 0, 0);
+    backdrop-filter: blur(25px) brightness(1.2);
+    -webkit-backdrop-filter: blur(25px) brightness(1.2);
 }
 
 .btn-flutuante:active {
-    transform: translateY(-2px) scale(1.05);
+    transform: translateY(-2px) scale(1.01);
+    box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
 
-/* Tooltip no hover */
+/* Tooltip */
 .btn-flutuante::before {
     content: 'Limpar Tudo';
     position: absolute;
-    right: 70px;
-    background: #333;
+    right: 110%;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     color: white;
-    padding: 8px 12px;
-    border-radius: 6px;
-    font-size: 14px;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 13px;
     white-space: nowrap;
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.3s;
+    transition: opacity 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .btn-flutuante:hover::before {
     opacity: 1;
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+    .btn-flutuante {
+        bottom: 24px;
+        right: 24px;
+        min-width: 110px;
+        height: 48px;
+        font-size: 14px;
+    }
 }
 </style>
 <style>
