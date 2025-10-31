@@ -566,6 +566,27 @@
     font-weight: 600;
     position: relative;
     box-shadow: 0 4px 12px rgba(197, 69, 69, 0.3);
+    animation: slideInAviso 0.4s ease-out, pulse 2s ease-in-out infinite;
+}
+@keyframes pulse {
+    0%, 100% {
+        box-shadow: 0 4px 12px rgba(252, 165, 165, 0.4);
+    }
+    50% {
+        box-shadow: 0 6px 20px rgba(252, 165, 165, 0.7);
+    }
+}
+
+/* ===== HOVER EFFECT ===== */
+.aviso-destaque:hover {
+    background: linear-gradient(135deg, #f87171 0%, #fca5a5 100%);  /* ⬅️ Inverte gradiente */
+    box-shadow: 0 6px 16px rgba(252, 165, 165, 0.6);  /* ⬅️ Sombra mais intensa */
+    transform: translateY(-2px);       /* ⬅️ Levanta levemente */
+    
+}
+
+.aviso-destaque:hover::before {
+    transform: translateY(-50%) scale(1.1);  /* ⬅️ Ícone aumenta no hover */
 }
 
 .aviso-destaque::before {
@@ -576,6 +597,7 @@
     transform: translateY(-50%);
     font-size: 20px;
     font-style: normal;
+    transition: transform 0.3s ease;
 }
 
 .aviso-destaque strong {
